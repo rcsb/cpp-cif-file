@@ -1,1 +1,20 @@
 * text=auto !eol
+/.cproject -text
+/.project -text
+.settings/org.eclipse.core.runtime.prefs -text
+/Makefile -text
+/SConscript -text
+include/.cvsignore -text
+include/CifDataInfo.h -text
+include/CifFile.h -text
+include/CifParentChild.h -text
+include/DicFile.h -text
+include/ParentChild.h -text
+lib/.cvsignore -text
+obj/.cvsignore -text
+src/.cvsignore -text
+src/CifDataInfo.C -text
+src/CifFile.C -text
+src/CifParentChild.C -text
+src/DicFile.C -text
+src/ParentChild.C -text
