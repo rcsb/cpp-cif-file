@@ -79,6 +79,19 @@ void CifFile::Init()
 }
 
 
+void CifFile::SetSrcFileName(const string& srcFileName)
+{
+    // VLAD - TODO check for file existence and throw exception
+    _srcFileName = srcFileName;
+}
+
+
+const string& CifFile::GetSrcFileName()
+{
+    return (_srcFileName);
+}
+
+
 void CifFile::SetQuoting(eQuoting quoting)
 {
 

@@ -44,6 +44,9 @@
 class CifFile : public TableFile
 {
   public:
+    std::string _parsingDiags;
+    std::string _checkingDiags;
+
     static const unsigned int STD_CIF_LINE_LENGTH = 80;
 
     enum eQuoting
@@ -133,6 +136,38 @@ class CifFile : public TableFile
     **  \exception: None
     */
     ~CifFile();
+
+    /**
+    **  Sets file name of a file that was the source of the object data.
+    **
+    **  \param srcFileName - The name of the source data file.
+    **
+    **  \return None
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    void SetSrcFileName(const std::string& srcFileName);
+
+
+    /**
+    **  Retrieves source file name.
+    **
+    **  \param: None
+    **
+    **  \return - source file name
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    const std::string& GetSrcFileName();
+
 
     /**
     **  Retrieves logging option.
@@ -449,6 +484,8 @@ class CifFile : public TableFile
 
 
   private:
+    std::string _srcFileName;
+
     bool _extraChecks;
 
     void Init();
