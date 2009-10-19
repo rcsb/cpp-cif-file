@@ -374,6 +374,22 @@ class CifFile : public TableFile
       const bool extraChecks = false);
 
     /**
+    **  Gets parsing diagnostics.
+    **
+    **  \param: None
+    **
+    **  \return - reference to parsing diagnostics
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    const std::string& GetParsingDiags();
+
+
+    /**
     **  Finds indices of rows that contain all CIF null values. A CIF null
     **  value is defined as a "?" or "".
     **

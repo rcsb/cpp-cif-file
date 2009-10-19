@@ -294,6 +294,12 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
 }
 
 
+const string& CifFile::GetParsingDiags()
+{
+    return (_parsingDiags);
+}
+
+
 int CifFile::_IsQuotableText(const string& itemValue)
 {
 
