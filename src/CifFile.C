@@ -499,9 +499,12 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
             embeddedQuotes = true;
             multipleWordQuotes = "\'";
         }
-        else if ((!specialChars) && CifString::IsSpecialChar(itemValue[i]))
+        else if (!specialChars)
         {
-            specialChars = true;
+            if ((i == 0) && (CifString::IsSpecialFirstChar(itemValue[i])))
+                specialChars = true;
+            if ((i != 0) && (CifString::IsSpecialChar(itemValue[i])))
+                specialChars = true;
         }
     }
 
