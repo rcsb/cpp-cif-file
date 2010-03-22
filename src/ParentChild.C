@@ -15,6 +15,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 #include <algorithm>
 
 #include "Exceptions.h"
@@ -28,6 +30,7 @@ using std::runtime_error;
 using std::find;
 using std::string;
 using std::vector;
+using std::multiset;
 using std::map;
 using std::cout;
 using std::endl;
@@ -339,8 +342,21 @@ void ParentChild::ISTableFindPairs(
         vector<unsigned int> found2;
         itemLinkedGroupList.Search(found2, searchVal2, searchCol2);
 
+#ifndef VLAD_FIX
+        vector<string> found2Keys;
+        for (unsigned int found2I = 0; found2I < found2.size(); ++found2I)
+        {
+            found2Keys.push_back(itemLinkedGroupList(found2[found2I],
+              "parent_name"));
+        }
+
+        if (!KeysMatch(parKeys, found2Keys))
+            continue;
+#else
+
         if (found2.size() != parKeys.size())
             continue;
+#endif
 
         vector<string> childKeys(parKeys.size());
         childKeys[0] = itemLinkedGroupList(found1[found1I],
@@ -669,3 +685,29 @@ bool ParentChild::IsParKeyPresent(const vector<string>& parKey,
     return (false);
 }
 
+
+bool ParentChild::KeysMatch(const vector<string>& firstKey,
+  const vector<string>& secondKey)
+{
+    if (firstKey.size() != secondKey.size())
+        return (false);
+
+    multiset<string, StringLess> first(firstKey.begin(), firstKey.end());
+    multiset<string, StringLess> second(secondKey.begin(), secondKey.end());
+ 
+#ifdef VLAD_DEL
+    multiset<string> first;
+    multiset<string> second;
+  
+    for (unsigned int ind = 0; ind < firstKey.size(); ++ind)
+        first.insert(firstKey[ind];
+
+    for (unsigned int ind = 0; ind < secondKey.size(); ++ind)
+        second.insert(secondKey[ind];
+#endif
+
+    if (first != second)
+        return (false);
+
+    return (true);
+}

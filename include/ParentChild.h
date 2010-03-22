@@ -83,6 +83,8 @@ class ParentChild
 
     void UpdateRelations(std::vector<std::string>& parKeys,
       std::vector<std::vector<std::string> >& comboKeys);
+    bool KeysMatch(const std::vector<std::string>& firstKey,
+      const std::vector<std::string>& secondKey);
 };
 
 
