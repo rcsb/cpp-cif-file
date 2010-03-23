@@ -29,9 +29,12 @@
 using std::runtime_error;
 using std::find;
 using std::string;
+using std::pair;
 using std::vector;
+using std::set;
 using std::multiset;
 using std::map;
+using std::multimap;
 using std::cout;
 using std::endl;
 
@@ -311,6 +314,12 @@ void ParentChild::ISTableFindPairs(
   map<string, vector<vector<string> > >& childrenKeys,
   const vector<string>& parKeys, ISTable& itemLinkedGroupList)
 {
+#ifdef VLAD_DEBUG
+    cout << "Parent key:" << endl;
+    for (unsigned int parKeyI = 0; parKeyI < parKeys.size(); ++parKeyI)
+        cout << parKeys[parKeyI] << endl;
+#endif
+
     string parCatName;
     CifString::GetCategoryFromCifItem(parCatName, parKeys[0]);
 
@@ -326,7 +335,7 @@ void ParentChild::ISTableFindPairs(
 
     for (unsigned int found1I = 0; found1I < found1.size(); ++found1I)
     {
-        // See how big this group is. If size does not match, continue;
+        // See if parent key of this group matches the input parent key.
         vector<string> searchCol2;
         searchCol2.push_back("parent_category_id");
         searchCol2.push_back("link_group_id");
@@ -358,15 +367,60 @@ void ParentChild::ISTableFindPairs(
             continue;
 #endif
 
-        vector<string> childKeys(parKeys.size());
-        childKeys[0] = itemLinkedGroupList(found1[found1I],
-          "child_name");
-
         string currChildCat = itemLinkedGroupList(found1[found1I],
           "child_category_id");
 
+#ifdef VLAD_DEL
+        vector<string> childKeys(parKeys.size());
+        childKeys[0] = itemLinkedGroupList(found1[found1I],
+          "child_name");
+#endif
+
         // Search for other keys, if they belong to the same child and group
 
+#ifndef VLAD_NEW
+        vector<string> childKeys;
+        multimap<string, string, StringLess> keysMap;
+
+        for (unsigned int found2I = 0; found2I < found2.size(); ++found2I)
+        {
+            multimap<string, string, StringLess>::value_type
+              valuePair(itemLinkedGroupList(found2[found2I],
+              "parent_name"), itemLinkedGroupList(found2[found2I],
+              "child_name"));
+            keysMap.insert(valuePair);
+        }
+
+        map<string, unsigned int, StringLess> parKeysMap;
+        for (unsigned int parKeyI = 0; parKeyI < parKeys.size(); ++parKeyI)
+        {
+            unsigned int ordinal = 0;
+
+            if (!(parKeysMap.find(parKeys[parKeyI]) == parKeysMap.end()))
+            {
+                ordinal = parKeysMap[parKeys[parKeyI]];
+            }
+ 
+            map<string, unsigned int, StringLess>::value_type
+              valuePair(parKeys[parKeyI], ordinal + 1);
+            parKeysMap.insert(valuePair);
+
+            pair<multimap<string, string, StringLess>::iterator,
+              multimap<string, string, StringLess>::iterator> range;
+
+            range = keysMap.equal_range(parKeys[parKeyI]);
+            for (multimap<string, string, StringLess>::iterator it =
+              range.first; it != range.second; ++it)
+            {
+                if (distance(range.first, it) == ordinal)
+                {
+                    childKeys.push_back((*it).second);
+                }
+            }
+        }
+#endif
+
+#ifdef VLAD_DEL
         bool match = true;
 
         for (unsigned int parKeysI = 1; parKeysI < parKeys.size(); ++parKeysI)
@@ -401,6 +455,12 @@ void ParentChild::ISTableFindPairs(
             // Found child key
             UpdateMap(childrenKeys, currChildCat, childKeys);
         }
+#else
+        if (parKeys.size() != childKeys.size())
+            cout << "PARENT AND CHILD KEYS DIFFERENT SIZE" << endl;
+
+        UpdateMap(childrenKeys, currChildCat, childKeys);
+#endif
     }
 }
 
