@@ -144,6 +144,7 @@ void ParentChild::GetComboKeys(const string& parCatName,
     }
 }
 
+
 void ParentChild::UpdateParComboKeys(const string& parName,
   vector<string>& parKeys)
 {
@@ -314,16 +315,10 @@ void ParentChild::ISTableFindPairs(
   map<string, vector<vector<string> > >& childrenKeys,
   const vector<string>& parKeys, ISTable& itemLinkedGroupList)
 {
-#ifdef VLAD_DEBUG
-    cout << "Parent key:" << endl;
-    for (unsigned int parKeyI = 0; parKeyI < parKeys.size(); ++parKeyI)
-        cout << parKeys[parKeyI] << endl;
-#endif
-
     string parCatName;
     CifString::GetCategoryFromCifItem(parCatName, parKeys[0]);
 
-    // Find the location of the first parent key item
+    // Find all the combo keys in which the first parent key exists.
     vector<string> searchCol;
     searchCol.push_back("parent_name");
 
@@ -351,35 +346,24 @@ void ParentChild::ISTableFindPairs(
         vector<unsigned int> found2;
         itemLinkedGroupList.Search(found2, searchVal2, searchCol2);
 
-#ifndef VLAD_FIX
-        vector<string> found2Keys;
+        vector<string> foundParKeys;
         for (unsigned int found2I = 0; found2I < found2.size(); ++found2I)
         {
-            found2Keys.push_back(itemLinkedGroupList(found2[found2I],
+            foundParKeys.push_back(itemLinkedGroupList(found2[found2I],
               "parent_name"));
         }
 
-        if (!KeysMatch(parKeys, found2Keys))
+        if (!KeysMatch(parKeys, foundParKeys))
             continue;
-#else
-
-        if (found2.size() != parKeys.size())
-            continue;
-#endif
 
         string currChildCat = itemLinkedGroupList(found1[found1I],
           "child_category_id");
 
-#ifdef VLAD_DEL
-        vector<string> childKeys(parKeys.size());
-        childKeys[0] = itemLinkedGroupList(found1[found1I],
-          "child_name");
-#endif
-
-        // Search for other keys, if they belong to the same child and group
-
-#ifndef VLAD_NEW
+        // The position of child key elements is relevant to the parent keys
         vector<string> childKeys;
+
+        // The multimap key is a parent key and the multimap value is
+        // child key.
         multimap<string, string, StringLess> keysMap;
 
         for (unsigned int found2I = 0; found2I < found2.size(); ++found2I)
@@ -391,18 +375,24 @@ void ParentChild::ISTableFindPairs(
             keysMap.insert(valuePair);
         }
 
+        // This block puts the child key to the appropriate position in
+        // the vector of child keys.
+
+        // The map key is a parent key and the map value is its order number.
+        // Order number different than 0 can happen for parent keys that have
+        // multiple child keys.
         map<string, unsigned int, StringLess> parKeysMap;
         for (unsigned int parKeyI = 0; parKeyI < parKeys.size(); ++parKeyI)
         {
-            unsigned int ordinal = 0;
+            unsigned int orderNum = 0;
 
             if (!(parKeysMap.find(parKeys[parKeyI]) == parKeysMap.end()))
             {
-                ordinal = parKeysMap[parKeys[parKeyI]];
+                orderNum = parKeysMap[parKeys[parKeyI]];
             }
  
             map<string, unsigned int, StringLess>::value_type
-              valuePair(parKeys[parKeyI], ordinal + 1);
+              valuePair(parKeys[parKeyI], orderNum + 1);
             parKeysMap.insert(valuePair);
 
             pair<multimap<string, string, StringLess>::iterator,
@@ -412,56 +402,18 @@ void ParentChild::ISTableFindPairs(
             for (multimap<string, string, StringLess>::iterator it =
               range.first; it != range.second; ++it)
             {
-                if (distance(range.first, it) == ordinal)
+                if (distance(range.first, it) == orderNum)
                 {
                     childKeys.push_back((*it).second);
                 }
             }
-        }
-#endif
+        } // For every parent key
 
-#ifdef VLAD_DEL
-        bool match = true;
-
-        for (unsigned int parKeysI = 1; parKeysI < parKeys.size(); ++parKeysI)
-        {
-            vector<string> searchCol3;
-            searchCol3.push_back("parent_category_id");
-            searchCol3.push_back("link_group_id");
-            searchCol3.push_back("child_category_id");
-            searchCol3.push_back("parent_name");
-
-            vector<string> searchVal3;
-            searchVal3.push_back(parCatName);
-            searchVal3.push_back(itemLinkedGroupList(found1[found1I],
-              "link_group_id"));
-            searchVal3.push_back(currChildCat);
-            searchVal3.push_back(parKeys[parKeysI]);
-
-            unsigned int found3 = itemLinkedGroupList.FindFirst(searchVal3,
-              searchCol3);
-
-            if (found3 == itemLinkedGroupList.GetNumRows())
-            {
-                match = false;
-                break;
-            }
-
-            childKeys[parKeysI] = itemLinkedGroupList(found3, "child_name");
-        }
-
-        if (match)
-        {
-            // Found child key
-            UpdateMap(childrenKeys, currChildCat, childKeys);
-        }
-#else
         if (parKeys.size() != childKeys.size())
             cout << "PARENT AND CHILD KEYS DIFFERENT SIZE" << endl;
 
         UpdateMap(childrenKeys, currChildCat, childKeys);
-#endif
-    }
+    } // For all combo keys that contain the first parent key item
 }
 
 
@@ -716,7 +668,7 @@ bool ParentChild::IsParKeyPresent(const vector<string>& parKey,
         {
             if (*pos2 == parKey)
             {
-                // Get its children and see  if they belong to this child
+                // Get its children and see if they belong to this child
                 // Search for the parent
                 for (map<vector<string>,
                   vector<vector<vector<string> > > >::iterator pos3 =
@@ -746,28 +698,40 @@ bool ParentChild::IsParKeyPresent(const vector<string>& parKey,
 }
 
 
+bool ParentChild::IsInParentComboKeys(const std::string& itemName)
+{
+    string catName;
+    CifString::GetCategoryFromCifItem(catName, itemName);
+
+    const vector<vector<string> >& parComboKeys = GetComboKeys(catName);
+
+    for (unsigned int keyI = 0; keyI < parComboKeys.size(); ++keyI)
+    {
+        if (GenCont::IsInVector(itemName, parComboKeys[keyI]))
+        {
+            return (true);
+        }
+    }
+
+    return (false);
+}
+
+
 bool ParentChild::KeysMatch(const vector<string>& firstKey,
   const vector<string>& secondKey)
 {
     if (firstKey.size() != secondKey.size())
+    {
         return (false);
+    }
 
     multiset<string, StringLess> first(firstKey.begin(), firstKey.end());
     multiset<string, StringLess> second(secondKey.begin(), secondKey.end());
  
-#ifdef VLAD_DEL
-    multiset<string> first;
-    multiset<string> second;
-  
-    for (unsigned int ind = 0; ind < firstKey.size(); ++ind)
-        first.insert(firstKey[ind];
-
-    for (unsigned int ind = 0; ind < secondKey.size(); ++ind)
-        second.insert(secondKey[ind];
-#endif
-
     if (first != second)
+    {
         return (false);
+    }
 
     return (true);
 }

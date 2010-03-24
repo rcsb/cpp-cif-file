@@ -45,6 +45,8 @@ class ParentChild
     bool IsParKeyPresent(const std::vector<std::string>& parKey,
       const std::string& childCatName);
 
+    bool IsInParentComboKeys(const std::string& itemName);
+
     ISTable* _groupTableP;
     ISTable* _groupListTableP;
 
@@ -64,6 +66,7 @@ class ParentChild
 
     virtual void GetParentCifItems(std::vector<std::string>& parCifItems,
       const std::string& cifItemName) = 0;
+
     void AddParentCategoryToItemLinkedGroup(ISTable& itemLinkedGroup,
       ISTable& itemLinkedGroupList);
 
@@ -83,6 +86,7 @@ class ParentChild
 
     void UpdateRelations(std::vector<std::string>& parKeys,
       std::vector<std::vector<std::string> >& comboKeys);
+
     bool KeysMatch(const std::vector<std::string>& firstKey,
       const std::vector<std::string>& secondKey);
 };
