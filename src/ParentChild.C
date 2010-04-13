@@ -402,7 +402,8 @@ void ParentChild::ISTableFindPairs(
             for (multimap<string, string, StringLess>::iterator it =
               range.first; it != range.second; ++it)
             {
-                if (distance(range.first, it) == orderNum)
+                if (static_cast<unsigned int>(distance(range.first, it)) ==
+                  orderNum)
                 {
                     childKeys.push_back((*it).second);
                 }
