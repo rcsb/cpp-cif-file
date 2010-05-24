@@ -155,5 +155,33 @@ chem_comp_tor                            4  '_chem_comp_tor.atom_id_4'          
 
 bool CifExcept::IsBadChildRelation(const string& itemName)
 {
+#ifdef BAD_RELATION
+refine_ls_restr_ncs                      4  '_refine_ls_restr_ncs.pdbx_auth_asym_id'              '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+chem_comp_link                           1  '_chem_comp_link.type_comp_1'                         '_chem_comp.type'                           chem_comp
+#endif
+
+    else if (itemName == "_chem_comp_link.type_comp_1")
+        return (true);
+
+#ifdef BAD_RELATION
+chem_comp_link                           2  '_chem_comp_link.type_comp_2'                         '_chem_comp.type'                           chem_comp
+#endif
+
+    else if (itemName == "_chem_comp_link.type_comp_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_nonpoly_scheme                      1  '_pdbx_nonpoly_scheme.asym_id'                        '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_nonpoly_scheme.asym_id")
+        return (true);
+
     return (false);
 }
