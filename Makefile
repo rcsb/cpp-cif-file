@@ -53,7 +53,8 @@ BASE_FILES = CifFile.ext \
              DicFile.ext \
              ParentChild.ext \
              CifParentChild.ext \
-             CifDataInfo.ext
+             CifDataInfo.ext \
+             CifExcept.ext
 
 # Source files. Replace ".ext" with ".C"
 SRC_FILES = ${BASE_FILES:.ext=.C}

@@ -5,11 +5,13 @@
 /Makefile -text
 /SConscript -text
 include/CifDataInfo.h -text
+include/CifExcept.h -text
 include/CifFile.h -text
 include/CifParentChild.h -text
 include/DicFile.h -text
 include/ParentChild.h -text
 src/CifDataInfo.C -text
+src/CifExcept.C -text
 src/CifFile.C -text
 src/CifParentChild.C -text
 src/DicFile.C -text
