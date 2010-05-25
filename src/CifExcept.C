@@ -211,5 +211,33 @@ pdbx_nonpoly_scheme                      1  '_pdbx_nonpoly_scheme.entity_id'    
     else if (itemName == "_pdbx_nonpoly_scheme.entity_id")
         return (true);
 
+#ifdef BAD_RELATION
+pdbx_struct_ref_seq_deletion             1  '_pdbx_struct_ref_seq_deletion.asym_id'               '_pdbx_poly_seq_scheme.asym_id'             pdbx_poly_seq_scheme
+#endif
+
+    else if (itemName == "_pdbx_struct_ref_seq_deletion.asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_struct_sheet_hbond                  4  '_pdbx_struct_sheet_hbond.range_id_1'                 '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_pdbx_struct_sheet_hbond.range_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_struct_sheet_hbond                  5  '_pdbx_struct_sheet_hbond.range_id_2'                 '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_pdbx_struct_sheet_hbond.range_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+atom_site                                5  '_atom_site.label_atom_id'                            '_chem_comp_atom.atom_id'                   chem_comp_atom
+#endif
+
+    else if (itemName == "_atom_site.label_atom_id")
+        return (true);
+
     return (false);
 }
