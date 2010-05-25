@@ -183,5 +183,33 @@ pdbx_nonpoly_scheme                      1  '_pdbx_nonpoly_scheme.asym_id'      
     else if (itemName == "_pdbx_nonpoly_scheme.asym_id")
         return (true);
 
+#ifdef BAD_RELATION
+pdbx_unobs_or_zero_occ_atoms             1  '_pdbx_unobs_or_zero_occ_atoms.PDB_model_num'         '_atom_site.pdbx_PDB_model_num'             atom_site
+#endif
+
+    else if (itemName == "_pdbx_unobs_or_zero_occ_atoms.PDB_model_num")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_unobs_or_zero_occ_residues          1  '_pdbx_unobs_or_zero_occ_residues.PDB_model_num'      '_atom_site.pdbx_PDB_model_num'             atom_site
+#endif
+
+    else if (itemName == "_pdbx_unobs_or_zero_occ_residues.PDB_model_num")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_nonpoly_scheme                      1  '_pdbx_nonpoly_scheme.mon_id'                         '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_nonpoly_scheme.mon_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_nonpoly_scheme                      1  '_pdbx_nonpoly_scheme.entity_id'                      '_atom_site.label_entity_id'                atom_site
+#endif
+
+    else if (itemName == "_pdbx_nonpoly_scheme.entity_id")
+        return (true);
+
     return (false);
 }
