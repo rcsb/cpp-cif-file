@@ -239,5 +239,240 @@ atom_site                                5  '_atom_site.label_atom_id'          
     else if (itemName == "_atom_site.label_atom_id")
         return (true);
 
+#ifdef BAD_RELATION
+struct_site_gen                          1  '_struct_site_gen.label_asym_id'                      '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_site_gen.label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_site_gen                          1  '_struct_site_gen.label_comp_id'                      '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_site_gen.label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_mon_prot_cis                      1  '_struct_mon_prot_cis.label_asym_id'                  '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_mon_prot_cis.label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_mon_prot_cis                      1  '_struct_mon_prot_cis.label_comp_id'                  '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_mon_prot_cis.label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_conn                              1  '_struct_conn.ptnr1_label_asym_id'                    '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_conn.ptnr1_label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_conn                              1  '_struct_conn.ptnr1_label_comp_id'                    '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_conn.ptnr1_label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_conn                              2  '_struct_conn.ptnr2_label_asym_id'                    '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_conn.ptnr2_label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_conn                              2  '_struct_conn.ptnr2_label_comp_id'                    '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_struct_conn.ptnr2_label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_planes_atom                1  '_pdbx_validate_planes_atom.auth_asym_id'             '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_planes_atom.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_peptide_omega              2  '_pdbx_validate_peptide_omega.auth_asym_id_2'         '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_peptide_omega.auth_asym_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_peptide_omega              1  '_pdbx_validate_peptide_omega.auth_asym_id_1'         '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_peptide_omega.auth_asym_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_close_contact              2  '_pdbx_validate_close_contact.auth_asym_id_2'         '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_close_contact.auth_asym_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_rmsd_angle                 2  '_pdbx_validate_rmsd_angle.auth_asym_id_2'            '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_rmsd_angle.auth_asym_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_rmsd_angle                 3  '_pdbx_validate_rmsd_angle.auth_asym_id_3'            '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_rmsd_angle.auth_asym_id_3")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_rmsd_bond                  2  '_pdbx_validate_rmsd_bond.auth_asym_id_2'             '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_rmsd_bond.auth_asym_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_symm_contact               2  '_pdbx_validate_symm_contact.auth_asym_id_2'          '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_symm_contact.auth_asym_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_close_contact              1  '_pdbx_validate_close_contact.auth_asym_id_1'         '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_close_contact.auth_asym_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_rmsd_angle                 1  '_pdbx_validate_rmsd_angle.auth_asym_id_1'            '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_rmsd_angle.auth_asym_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_rmsd_bond                  1  '_pdbx_validate_rmsd_bond.auth_asym_id_1'             '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_rmsd_bond.auth_asym_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_symm_contact               1  '_pdbx_validate_symm_contact.auth_asym_id_1'          '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_symm_contact.auth_asym_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_chiral                     1  '_pdbx_validate_chiral.auth_asym_id'                  '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_chiral.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_main_chain_plane           1  '_pdbx_validate_main_chain_plane.auth_asym_id'        '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_main_chain_plane.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_planes                     1  '_pdbx_validate_planes.auth_asym_id'                  '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_planes.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_validate_torsion                    1  '_pdbx_validate_torsion.auth_asym_id'                 '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_validate_torsion.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_struct_mod_residue                  1  '_pdbx_struct_mod_residue.auth_asym_id'               '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_pdbx_struct_mod_residue.auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_domain_range                        1  '_pdbx_domain_range.beg_label_asym_id'                '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_domain_range.beg_label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_domain_range                        1  '_pdbx_domain_range.beg_label_comp_id'                '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_domain_range.beg_label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_domain_range                        2  '_pdbx_domain_range.end_label_asym_id'                '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_domain_range.end_label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_domain_range                        2  '_pdbx_domain_range.end_label_comp_id'                '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_domain_range.end_label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_monomer                     1  '_pdbx_feature_monomer.label_asym_id'                 '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_feature_monomer.label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_monomer                     1  '_pdbx_feature_monomer.label_comp_id'                 '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_feature_monomer.label_comp_id")
+        return (true);
+
+
+#ifdef BAD_RELATION
+pdbx_refine_component                    1  '_pdbx_refine_component.label_asym_id'                '_atom_site.label_asym_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_refine_component.label_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_refine_component                    1  '_pdbx_refine_component.label_comp_id'                '_atom_site.label_comp_id'                  atom_site
+#endif
+
+    else if (itemName == "_pdbx_refine_component.label_comp_id")
+        return (true);
+
+// VLAD - did not finish everything. There are a lot of items. Must filter
+// per parent.
+
     return (false);
 }
