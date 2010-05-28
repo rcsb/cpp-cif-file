@@ -90,9 +90,139 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_struct_ref.biol_id")
         return (true);
 
-    // Non-key, non-mandatory, child; It seems that this item
+    // Non-key, mandatory, child; It seems that this item
     // is always set to '.'
     else if (itemName == "_struct_site_gen.label_alt_id")
+        return (true);
+
+    // Non-key, non-mandatory, child; It seems that this item
+    // is randomly set to '.',  depending on some conditions.
+    else if (itemName == "_atom_site_anisotrop.pdbx_label_seq_id")
+        return (true);
+
+    // Non-key, non-mandatory, child; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_mon_prot_cis.label_alt_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_database_related.details")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine.pdbx_ls_sigma_F")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_refine_tls_group.beg_label_seq_id")
+        return (true);
+
+    // Non-key, non-mandatory, child; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_refine_tls_group.beg_label_asym_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_refine_tls_group.end_label_seq_id")
+        return (true);
+
+    // Non-key, non-mandatory, child; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_refine_tls_group.end_label_asym_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_software.version")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine_ls_restr_ncs.pdbx_type")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_diffrn_radiation_wavelength.wavelength")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_em_imaging.specimen_holder_model")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_em_imaging.specimen_holder_type")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine_hist.d_res_low")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_exptl_crystal_grow.pdbx_pH_range")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.beg_label_alt_id")
+        return (true);
+
+    // Non-key, non-mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.beg_label_asym_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.beg_label_comp_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.beg_label_seq_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.end_label_alt_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.end_label_asym_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.end_label_comp_id")
+        return (true);
+
+    // Non-key, non-mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_struct_ncs_dom_lim.end_label_seq_id")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine_hist.d_res_high")
+        return (true);
+
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_em_sample_preparation.entity_assembly_id")
+        return (true);
+
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
         return (true);
 
     return (false);
@@ -469,6 +599,104 @@ pdbx_refine_component                    1  '_pdbx_refine_component.label_comp_i
 #endif
 
     else if (itemName == "_pdbx_refine_component.label_comp_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ref_seq_dif                       2  '_struct_ref_seq_dif.mon_id'                          '_entity_poly_seq.mon_id'                   entity_poly_seq
+#endif
+
+    else if (itemName == "_struct_ref_seq_dif.mon_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ref_seq_dif                       2  '_struct_ref_seq_dif.seq_num'                         '_entity_poly_seq.num'                      entity_poly_seq
+#endif
+
+    else if (itemName == "_struct_ref_seq_dif.seq_num")
+        return (true);
+
+#ifdef BAD_RELATION
+refine_ls_restr_ncs                      3  '_refine_ls_restr_ncs.pdbx_ens_id'                    '_struct_ncs_dom.pdbx_ens_id'               struct_ncs_dom
+#endif
+
+    else if (itemName == "_refine_ls_restr_ncs.pdbx_ens_id")
+        return (true);
+
+#ifdef BAD_RELATION
+atom_site                                11 '_atom_site.pdbx_ncs_dom_id'                          '_struct_ncs_dom.id'                        struct_ncs_dom
+#endif
+
+    else if (itemName == "_atom_site.pdbx_ncs_dom_id")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ncs_ens_gen                       1  '_struct_ncs_ens_gen.dom_id_1'                        '_struct_ncs_dom.id'                        struct_ncs_dom
+#endif
+
+    else if (itemName == "_struct_ncs_ens_gen.dom_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ncs_ens_gen                       2  '_struct_ncs_ens_gen.dom_id_2'                        '_struct_ncs_dom.id'                        struct_ncs_dom
+#endif
+
+    else if (itemName == "_struct_ncs_ens_gen.dom_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_assembly                    2  '_pdbx_feature_assembly.feature_software_id'          '_software.name'                            software
+#endif
+
+    else if (itemName == "_pdbx_feature_assembly.feature_software_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_domain                      3  '_pdbx_feature_domain.feature_software_id'            '_software.name'                            software
+#endif
+
+    else if (itemName == "_pdbx_feature_domain.feature_software_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_entry                       2  '_pdbx_feature_entry.feature_software_id'             '_software.name'                            software
+#endif
+
+    else if (itemName == "_pdbx_feature_entry.feature_software_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_monomer                     3  '_pdbx_feature_monomer.feature_software_id'           '_software.name'                            software
+#endif
+
+    else if (itemName == "_pdbx_feature_monomer.feature_software_id")
+        return (true);
+
+#ifdef BAD_RELATION
+pdbx_feature_sequence_range              3  '_pdbx_feature_sequence_range.feature_software_id'    '_software.name'                            software
+#endif
+
+    else if (itemName == "_pdbx_feature_sequence_range.feature_software_id")
+        return (true);
+
+#ifdef BAD_RELATION
+refine_ls_restr_ncs                      4  '_refine_ls_restr_ncs.pdbx_auth_asym_id'              '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
+        return (true);
+
+#ifdef BAD_RELATION
+em_sample_preparation                    4  '_em_sample_preparation.entity_assembly_id'   '_em_entity_assembly.id'      em_entity_assembly
+#endif
+
+    else if (itemName == "_em_sample_preparation.entity_assembly_id")
+        return (true);
+
+#ifdef BAD_RELATION
+refine_ls_restr_ncs                      4  '_refine_ls_restr_ncs.pdbx_auth_asym_id'              '_atom_site.auth_asym_id'                   atom_site
+#endif
+
+    else if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
         return (true);
 
 // VLAD - did not finish everything. There are a lot of items. Must filter
