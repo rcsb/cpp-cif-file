@@ -699,6 +699,76 @@ refine_ls_restr_ncs                      4  '_refine_ls_restr_ncs.pdbx_auth_asym
     else if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
         return (true);
 
+#ifdef BAD_RELATION
+struct_sheet_hbond                       6  '_struct_sheet_hbond.range_id_1'                      '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_hbond.range_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_sheet_hbond                       7  '_struct_sheet_hbond.range_id_2'                      '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_hbond.range_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_sheet_order                       2  '_struct_sheet_order.range_id_1'                      '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_order.range_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_sheet_order                       3  '_struct_sheet_order.range_id_2'                      '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_order.range_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_sheet_topology                    2  '_struct_sheet_topology.range_id_1'                   '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_topology.range_id_1")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_sheet_topology                    3  '_struct_sheet_topology.range_id_2'                   '_struct_sheet_range.id'                    struct_sheet_range
+#endif
+
+    else if (itemName == "_struct_sheet_topology.range_id_2")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ref_seq                           1  '_struct_ref_seq.seq_align_beg'                       '_entity_poly_seq.num'                      entity_poly_seq
+#endif
+
+    else if (itemName == "_struct_ref_seq.seq_align_beg")
+        return (true);
+
+#ifdef BAD_RELATION
+struct_ref_seq                           2  '_struct_ref_seq.seq_align_end'                       '_entity_poly_seq.num'                      entity_poly_seq
+#endif
+
+    else if (itemName == "_struct_ref_seq.seq_align_end")
+        return (true);
+
+#ifdef BAD_RELATION
+entity_link                              4  '_entity_link.entity_seq_num_1'                       '_entity_poly_seq.num'                      entity_poly_seq
+#endif
+
+    else if (itemName == "_entity_link.entity_seq_num_1")
+        return (true);
+
+#ifdef BAD_RELATION
+entity_link                              5  '_entity_link.entity_seq_num_2'                       '_entity_poly_seq.num'                      entity_poly_seq
+#endif
+
+    else if (itemName == "_entity_link.entity_seq_num_2")
+        return (true);
+
 // VLAD - did not finish everything. There are a lot of items. Must filter
 // per parent.
 
