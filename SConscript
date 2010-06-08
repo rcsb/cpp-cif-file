@@ -19,13 +19,15 @@ libSrcList =['src/CifFile.C',
 			 'src/DicFile.C',
                          'src/ParentChild.C',
                          'src/CifParentChild.C',
-                         'src/CifDataInfo.C']
+                         'src/CifDataInfo.C',
+                         'src/CifExcept.C']
 libObjList = [s.replace('.C','.o') for s in libSrcList]
 libIncList =['include/CifFile.h',
 			 'include/DicFile.h',
                          'include/ParentChild.h',
                          'include/CifParentChild.h',
-            		 'include/CifDataInfo.h']
+            		 'include/CifDataInfo.h',
+                         'include/CifExcept.h']
 
 #
 #oPath = os.path.join(env.subst('$MY_OBJ_INSTALL_PATH'),'*.o')
@@ -35,7 +37,7 @@ aggLibName='cif-all'
 
 
 aggObjs = [ 'MmcifToXml.o','XmlWriter.o','XsdWriter.o','PdbMlSchema.o','PdbMlWriter.o',
- 		'CifDataInfo.o','CifParentChild.o', 'ParentChild.o', 'CifFile.o',
+ 		'CifDataInfo.o','CifExcept.o', 'CifParentChild.o', 'ParentChild.o', 'CifFile.o',
 	    'CifFileUtil.o', 'CifCorrector.o',	    
 		   'CifFileReadDef.o',
 		   'CifParser.o',
