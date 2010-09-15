@@ -121,6 +121,18 @@ unsigned int CifFile::GetQuoting()
 }
 
 
+void CifFile::SetLooping(const string& catName, bool looping)
+{
+    _looping[catName] = looping;
+}
+
+
+bool CifFile::GetLooping(const string& catName)
+{
+    return (_looping[catName]);
+}
+
+
 void CifFile::Write(const string& cifFileName, const bool sortTables,
   const bool writeEmptyTables)
 {
@@ -868,7 +880,7 @@ void CifFile::Write(ostream& cifo, vector<unsigned int>& tables,
 
             const vector<string>& colNames = tableP->GetColumnNames();
 
-            if (numRow <= 1)
+            if ((numRow <= 1) && (!GetLooping(tableP->GetName())))
             {
                 // cwid is maxColumnNameSize
                 unsigned int longestNameIndex = 0;

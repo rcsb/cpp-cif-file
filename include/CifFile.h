@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <sstream>
 
@@ -255,6 +256,41 @@ class CifFile : public TableFile
     unsigned int GetQuoting();
  
     /**
+    **  This method is used in order to control how single row categories are
+    **  written: in form of a "loop_" construct or as an item-value pair.
+    **
+    **  \param catName - category name
+    **  \param looping - category looping option. If false and the
+    **    category is a single row category, that category will not be
+    **    written with "loop_" construct. Otherwise, if true, single row
+    **    category will be written with "loop_" construct.
+    **
+    **  \return None
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    void SetLooping(const std::string& catName, bool looping = false);
+
+    /**
+    **  Retrieves looping option of a category.
+    **
+    **  \param catName - category name
+    **
+    **  \return - category looping option, as described in SetLooping() method.
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    bool GetLooping(const std::string& catName);
+ 
+    /**
     **  Writes the data out to a text file.
     **
     **  \param[in] cifFileName - relative or absolute name of the text file
@@ -469,6 +505,7 @@ class CifFile : public TableFile
     bool _verbose;
     bool _smartPrint;
     std::string _quotes;
+    std::map<std::string, bool> _looping;
 
     int _IsQuotableText(const std::string& itemValue);
     eIdentType _FindPrintType(const std::vector<std::string>& values);
