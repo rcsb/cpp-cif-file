@@ -205,7 +205,6 @@ class CifFile : public TableFile
     inline void SetSmartPrint(bool smartPrint = true);
 
 
-
     /**
     **  Retrieves smart printing option.
     **
@@ -410,6 +409,40 @@ class CifFile : public TableFile
       const bool extraChecks = false);
 
     /**
+    **  Sets enumerations checking option for case-insensitive types.
+    **
+    **  \param caseSense - case sensitivity of enumeration values check. If
+    **    false, enumeration values of case-insensitive types will be checked
+    **    as case-insensitive. If true, enumeration values of case-insensitive
+    **    types will be checked as case-sensitive.
+    **
+    **  \return None
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    void SetEnumCheck(bool caseSense = false);
+
+    /**
+    **  Retrieves enumerations checking option for case-insensitive types.
+    **
+    **  \param: None
+    **
+    **  \return true - if case-sensitive enumeration check is enabled
+    **  \return false - if case-insensitive enumeration check is enabled
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    bool GetEnumCheck();
+
+    /**
     **  Gets parsing diagnostics.
     **
     **  \param: None
@@ -506,6 +539,7 @@ class CifFile : public TableFile
     bool _smartPrint;
     std::string _quotes;
     std::map<std::string, bool> _looping;
+    bool _enumCaseSense;
 
     int _IsQuotableText(const std::string& itemValue);
     eIdentType _FindPrintType(const std::vector<std::string>& values);

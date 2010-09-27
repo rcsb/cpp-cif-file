@@ -306,6 +306,18 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
 }
 
 
+void CifFile::SetEnumCheck(bool caseSense)
+{
+    _enumCaseSense = caseSense;
+}
+
+
+bool CifFile::GetEnumCheck()
+{
+    return(_enumCaseSense);
+}
+
+
 const string& CifFile::GetParsingDiags()
 {
     return (_parsingDiags);
@@ -2516,8 +2528,16 @@ int CifFile::CheckCellOtherEnum(const string& cell, const string& primCode,
     {
         if (primCode == "uchar")
         {
-            if (String::IsCiEqual(cell, enumlist[m]))
-                matched = 1;
+            if (_enumCaseSense == true)
+            {
+                if (String::IsEqual(cell, enumlist[m], Char::eCASE_SENSITIVE))
+                    matched = 1;
+            }
+            else
+            {
+                if (String::IsCiEqual(cell, enumlist[m]))
+                    matched = 1;
+            }
         }
         else
         {
