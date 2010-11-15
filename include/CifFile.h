@@ -532,6 +532,11 @@ class CifFile : public TableFile
         eRIGHT
     };
 
+    std::string _beginDataKeyword;
+    std::string _endDataKeyword;
+
+    std::string _beginLoopKeyword;
+    std::string _endLoopKeyword;
 
     unsigned int _maxCifLineLength;
     std::string _nullValue;

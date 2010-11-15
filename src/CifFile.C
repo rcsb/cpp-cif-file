@@ -70,11 +70,18 @@ CifFile::~CifFile()
 void CifFile::Init()
 {
 
+  _beginDataKeyword = "data_";
+  _endDataKeyword = "# ";
+
+  _beginLoopKeyword = "loop_";
+  _endLoopKeyword = "";
+
   _maxCifLineLength = STD_CIF_LINE_LENGTH;
   _nullValue = CifString::UnknownValue;
   _verbose = false;
   _smartPrint = false;
   _quotes = "\'";
+  _enumCaseSense = false;
 
 }
 
@@ -865,7 +872,7 @@ void CifFile::Write(ostream& cifo, vector<unsigned int>& tables,
     for (unsigned int blockI = 0, jt = 0;
       blockI < _blocks.size(); blockI++)
     {
-        cifo << "data_" << _blocks[blockI].GetName() << endl;
+        cifo << _beginDataKeyword << _blocks[blockI].GetName() << endl;
 
         for (unsigned int tableI = 0; tableI < _blocks[blockI]._tables.size();
           ++tableI, ++jt)
@@ -945,7 +952,7 @@ void CifFile::Write(ostream& cifo, vector<unsigned int>& tables,
             }
             else
             {
-                cifo << "loop_" << endl;
+                cifo << _beginLoopKeyword << endl;
 
                 for (unsigned int i = 0; i < numColumn; i++)
                 {
@@ -1049,10 +1056,19 @@ void CifFile::Write(ostream& cifo, vector<unsigned int>& tables,
                     rowValues.clear();
                 }
 
+                if (!_endLoopKeyword.empty())
+                {
+                    cifo << _endLoopKeyword << endl;
+                }
+
                 cwidth.clear();
             }
         }
-        cifo << "# " << endl;
+
+        if (!_endDataKeyword.empty())
+        {
+            cifo << _endDataKeyword << endl;
+        }
     }
 
 }
