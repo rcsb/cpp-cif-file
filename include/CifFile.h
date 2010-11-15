@@ -363,6 +363,33 @@ class CifFile : public TableFile
       const bool writeEmptyTables = false);
 
     /**
+    **  Writes the data out to a text file in NMR-STAR format.
+    **
+    **  \param[in] nmrStarFileName - relative or absolute name of the text file
+    **    to which the data from \e CifFile object is to be written to.
+    **  \param[in] globalBlockName - the name of the global NMR-STAR block.
+    **  \param[in] sortTables - optional parameter that indicates whether
+    **    written tables should be sorted (if true) or not sorted (if false).
+    **    If \e sortTables is not specified, tables are not sorted prior to
+    **    writing them.
+    **  \param[in] writeEmptyTables - optional parameter that indicates
+    **    whether empty tables (0 rows) are to be written (if true) or not
+    **    written (if false). If \e writeEmptyTables is not specified, empty
+    **    tables are not written.
+    **
+    **  \return None
+    **
+    **  \pre None
+    **
+    **  \post None
+    **
+    **  \exception: None
+    */
+    void WriteNmrStar(const std::string& nmrStarFileName,
+      const std::string& globalBlockName,  const bool sortTables = false,
+      const bool writeEmptyTables = false);
+
+    /**
     **  Checks a CIF file (all blocks in it) against the dictionary.
     **
     **  \param[in] dicRef - reference to a dictionary file. The check is

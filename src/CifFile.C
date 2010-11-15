@@ -236,6 +236,41 @@ void CifFile::Write(ostream& cifo, const vector<string>& catOrder,
 }
 
 
+void CifFile::WriteNmrStar(const string& nmrStarFileName,
+  const string& globalBlockName, const bool sortTables,
+  const bool writeEmptyTables)
+{
+
+    string savedBeginDataKeyword = _beginDataKeyword;
+    string savedEndDataKeyword = _endDataKeyword;
+
+    string savedBeginLoopKeyword = _beginLoopKeyword;
+    string savedEndLoopKeyword = _endLoopKeyword;
+
+    _beginDataKeyword = "save_";
+    _endDataKeyword = "save_";
+
+    _beginLoopKeyword = "loop_";
+    _endLoopKeyword = "stop_";
+
+    ofstream cifo(nmrStarFileName.c_str(), ios::out | ios::trunc);
+
+    cifo << "data_" << globalBlockName << endl;
+    cifo << endl;
+
+    Write(cifo, sortTables, writeEmptyTables);
+
+    cifo.close();
+
+    _beginDataKeyword = savedBeginDataKeyword;
+    _endDataKeyword = savedEndDataKeyword;
+
+    _beginLoopKeyword = savedBeginLoopKeyword;
+    _endLoopKeyword = savedEndLoopKeyword;
+
+}
+
+
 int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
   const bool extraChecks)
 {
