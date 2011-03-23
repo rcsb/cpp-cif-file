@@ -22,6 +22,7 @@
 #include "CifFile.h"
 
 
+using std::runtime_error;
 using std::string;
 using std::vector;
 using std::make_pair;
@@ -413,6 +414,7 @@ int CifFile::_IsQuotableText(const string& itemValue)
 
 }
 
+
 CifFile::eIdentType CifFile::_FindPrintType(const vector<string>& values)
 {
 
@@ -522,10 +524,18 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemValue");
+            }
+
             if (linePos + width - N < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - N; k++)
                     cifo << " ";
                 linePos += width - N;
+            }
         }
 
         cifo << _nullValue;
@@ -535,10 +545,18 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
         {
             if (linePos != 0)
             {
+                if (width < (unsigned int)N)
+                {
+                    throw runtime_error("CRITICAL ERROR IN: "\
+                      "CifFile::_PrintItemValue");
+                }
+
                 if (linePos + width - N < _maxCifLineLength)
+                {
                     for (unsigned int k = 0; k < width - N; k++)
                         cifo << " ";
                     linePos += width - N;
+                }
             }
         }
 
@@ -643,10 +661,18 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemValue");
+            }
+
             if (linePos + width - N < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - N; k++)
                     cifo << " ";
                 linePos += width - N;
+            }
         }
 
         cifo << fullItemValue;
@@ -665,7 +691,14 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
         if (linePos > Ident.size())
         {
             linePos = linePos + width - N;
-            for (int i = 0; i < (int)(width - N); i++)
+
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemValue");
+            }
+
+            for (unsigned int i = 0; i < width - N; i++)
                 cifo << " ";
         }
     }
@@ -674,10 +707,24 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
     {
         if (linePos != 0)
         {
+            if (N < 1)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemValue");
+            }
+
+            if (width < ((unsigned int)N - 1))
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemValue");
+            }
+
             if (linePos + width - (N - 1) < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - (N - 1); k++)
                     cifo << " ";
                 linePos += width - (N - 1);
+            }
         }
     }
 
@@ -730,10 +777,18 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemNameInHeader");
+            }
+
             if (linePos + width - N < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - N; k++)
                     cifo << " ";
                 linePos += width - N;
+            }
         }
 
         cifo << _nullValue;
@@ -743,10 +798,18 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
         {
             if (linePos != 0)
             {
+                if (width < (unsigned int)N)
+                {
+                    throw runtime_error("CRITICAL ERROR IN: "\
+                      "CifFile::_PrintItemNameInHeader");
+                }
+
                 if (linePos + width - N < _maxCifLineLength)
+                {
                     for (unsigned int k = 0; k < width - N; k++)
                         cifo << " ";
                     linePos += width - N;
+                }
             }
         }
 
@@ -840,10 +903,18 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemNameInHeader");
+            }
+
             if (linePos + width - N < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - N; k++)
                     cifo << " ";
                 linePos += width - N;
+            }
         }
 
         cifo << fullItemValue;
@@ -861,8 +932,15 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     {
         if (linePos > Ident.size())
         {
+            if (width < (unsigned int)N)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemNameInHeader");
+            }
+
             linePos = linePos + width - N;
-            for (int i = 0; i < (int)(width - N); i++)
+
+            for (unsigned int i = 0; i < width - N; i++)
                 cifo << " ";
         }
     }
@@ -871,10 +949,24 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     {
         if (linePos != 0)
         {
+            if (N < 1)
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemNameInHeader");
+            }
+
+            if (width < ((unsigned int)N - 1))
+            {
+                throw runtime_error("CRITICAL ERROR IN: "\
+                  "CifFile::_PrintItemNameInHeader");
+            }
+
             if (linePos + width - (N - 1) < _maxCifLineLength)
+            {
                 for (unsigned int k = 0; k < width - (N - 1); k++)
                     cifo << " ";
                 linePos += width - (N - 1);
+            }
         }
     }
 
