@@ -371,21 +371,34 @@ int CifFile::_IsQuotableText(const string& itemValue)
 
   if (itemValue.empty())
       return(0);
-
+    
   if (itemValue[0] == '_')
       return(1);
 
   for (unsigned int i = 0; i < itemValue.size(); i++)
   {
-      if (itemValue[i] == ' ') 
+      if (itemValue[i] == ' ')
           return(1);
-      else if (itemValue[i] == '\n') 
+
+      if (itemValue[i] == '\n')
           return(1);
-      else if (itemValue[i] == '\'' || itemValue[i] == '\"') 
+
+      if (itemValue[i] == '\'' || itemValue[i] == '\"')
           return(1);
-      else if (CifString::IsSpecialChar(itemValue[i]))
+
+      if (i == 0)
       {
-          return(1);
+          if (CifString::IsSpecialFirstChar(itemValue[i]))
+          {
+              return(1);
+          }
+      }
+      else
+      {
+          if (CifString::IsSpecialChar(itemValue[i]))
+          {
+              return(1);
+          }
       }
   }
 
@@ -399,7 +412,6 @@ int CifFile::_IsQuotableText(const string& itemValue)
   return(0);
 
 }
-
 
 CifFile::eIdentType CifFile::_FindPrintType(const vector<string>& values)
 {
