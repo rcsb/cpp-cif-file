@@ -732,7 +732,6 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
     {
         cifo << " ";
         linePos++;
-        N++;
     }
 
     if (multipleWord || multipleLine || embeddedQuotes) 
@@ -974,7 +973,6 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     {
         cifo << " ";
         linePos++;
-        N++;
     }
 
     if (multipleWord || multipleLine || embeddedQuotes) 
