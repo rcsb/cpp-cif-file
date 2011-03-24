@@ -498,7 +498,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
     bool multipleLine, multipleWord, embeddedQuotes, embeddedSingleQuotes,
       embeddedDoubleQuotes;
     string Ident;
-    int N = 0;
+    unsigned int N = 0;
     // VLAD: with has different meaning for eNONE and others.
 
     if ((identType == eNONE) && (width != 0))
@@ -524,7 +524,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemValue");
@@ -545,7 +545,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
         {
             if (linePos != 0)
             {
-                if (width < (unsigned int)N)
+                if (width < N)
                 {
                     throw runtime_error("CRITICAL ERROR IN: "\
                       "CifFile::_PrintItemValue");
@@ -661,7 +661,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemValue");
@@ -692,7 +692,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
         {
             linePos = linePos + width - N;
 
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemValue");
@@ -713,7 +713,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
                   "CifFile::_PrintItemValue");
             }
 
-            if (width < ((unsigned int)N - 1))
+            if (width < N - 1)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemValue");
@@ -751,7 +751,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     bool multipleLine, multipleWord, embeddedQuotes, embeddedSingleQuotes,
       embeddedDoubleQuotes;
     string Ident;
-    int N = 0;
+    unsigned int N = 0;
     // VLAD: with has different meaning for eNONE and others.
 
     if ((identType == eNONE) && (width != 0))
@@ -777,7 +777,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemNameInHeader");
@@ -798,7 +798,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
         {
             if (linePos != 0)
             {
-                if (width < (unsigned int)N)
+                if (width < N)
                 {
                     throw runtime_error("CRITICAL ERROR IN: "\
                       "CifFile::_PrintItemNameInHeader");
@@ -903,7 +903,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
 
         if (identType == eRIGHT)
         {
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemNameInHeader");
@@ -932,7 +932,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     {
         if (linePos > Ident.size())
         {
-            if (width < (unsigned int)N)
+            if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemNameInHeader");
@@ -955,7 +955,7 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
                   "CifFile::_PrintItemNameInHeader");
             }
 
-            if (width < ((unsigned int)N - 1))
+            if (width < N - 1)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
                   "CifFile::_PrintItemNameInHeader");
