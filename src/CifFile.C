@@ -706,12 +706,6 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
     {
         if (linePos != 0)
         {
-            if (N < 1)
-            {
-                throw runtime_error("CRITICAL ERROR IN: "\
-                  "CifFile::_PrintItemValue");
-            }
-
             if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\
@@ -946,12 +940,6 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     {
         if (linePos != 0)
         {
-            if (N < 1)
-            {
-                throw runtime_error("CRITICAL ERROR IN: "\
-                  "CifFile::_PrintItemNameInHeader");
-            }
-
             if (width < N)
             {
                 throw runtime_error("CRITICAL ERROR IN: "\

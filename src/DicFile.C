@@ -504,16 +504,15 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
                 {
                   const vector<string>& rowValues =
 	            cattbl2->GetRow(listOutcat2[j]);
-	          for (unsigned int i=0; i< numColumn-1; i++)
+	          for (unsigned int i=0; i< numColumn; i++)
                   {
 	              ilen = rowValues[i].size();
 	              if ( _IsQuotableText(rowValues[i]))
                         ilen+=2;
 	      
-	              if (  ilen > cwidth[i]-2)
-                        cwidth[i]=ilen+2;
+	              if (  ilen > cwidth[i])
+                        cwidth[i]=ilen;
 	          }
-	          cwidth[numColumn-1] = 0+2;
 	        }
 	        for (unsigned int j=0; j < listOutcat2.size(); ++j)
                 {
@@ -641,14 +640,13 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
                         {
                             const vector<string>& rowValues =
 	                      cattbl2->GetRow(listOutcat2[j]);
-	                    for (unsigned int i=0; i< numColumn-1; i++)
+	                    for (unsigned int i=0; i< numColumn; i++)
                             {
 		              ilen = rowValues[i].size();
 		              if ( _IsQuotableText(rowValues[i])) ilen+=2;
 		
-		              if (  ilen > cwidth[i]-2) cwidth[i]=ilen+2;
+		              if (  ilen > cwidth[i]) cwidth[i]=ilen;
 	                }
-	                cwidth[numColumn-1] = 0+2;
 	              }
 	              for (unsigned int j=0; j < listOutcat2.size(); ++j)
                       {
