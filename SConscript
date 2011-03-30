@@ -3,14 +3,16 @@
 # Created: Aug 16, 2006 - Jdw
 # Updated: Aug 23, 2006 - Jdw
 #          Add aggregated library..
+# Updated: Mar 30, 2011 jdw clone environment
 #
 import os.path,glob
 Import('env')
+env=env.Clone()
 #
-if (len(env.subst('$MYDEBUG')) > 0):
-	dict = env.Dictionary()
-	for k,v in dict.items():
-		print  k, " = ", str(v)
+#if (len(env.subst('$MYDEBUG')) > 0):
+#	dict = env.Dictionary()
+#	for k,v in dict.items():
+#		print  k, " = ", str(v)
 #
 libName = 'cif-file'
 
