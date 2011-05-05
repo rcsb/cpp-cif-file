@@ -225,6 +225,36 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_refine_ls_restr_ncs.pdbx_auth_asym_id")
         return (true);
 
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_remediation_atom_site_mapping.label_seq_id")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_phasing_MIR_der.d_res_low")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_phasing_set.pdbx_d_res_low")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_phasing_MIR_der.d_res_high")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_phasing_set.pdbx_d_res_high")
+        return (true);
+
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_phasing_MIR_der.native_set_id")
+        return (true);
+
     return (false);
 }
 
