@@ -265,6 +265,11 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_pdbx_reflns_twin.fraction")
         return (true);
 
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_refine.ls_d_res_high")
+        return (true);
+
     return (false);
 }
 
