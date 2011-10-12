@@ -14,6 +14,8 @@
 // VLAD - Carefully examine all methods that accept with, for cases where
 // with is 0. This may happen if the value is empty !!
 
+#include <stdexcept>
+
 #include "GenString.h"
 #include "RcsbFile.h"
 #include "CifString.h"
@@ -22,6 +24,7 @@
 #include "CifFile.h"
 
 
+using std::exception;
 using std::runtime_error;
 using std::string;
 using std::vector;
@@ -2354,8 +2357,9 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
                 if (ret != 0)
                 {
                     log << "ERROR - In block \"" << block.GetName() <<
-                       "\", data type pattern for value \"" << cell << "\" for \"" <<
-                      cifItemName << "\" does not match." << endl;
+                       "\", data type pattern of value \"" << cell <<
+                       "\" for \"" << cifItemName <<
+                       "\" does not match, in row #" << l + 1 << endl;
                     ret = 0;
                 }
                 else
@@ -2387,7 +2391,7 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
                             }
                         }
 
-                        log << ", in row # " << l + 1 << ", value \"" <<
+                        log << ", in row #" << l + 1 << ", value \"" <<
                           cell << "\" does not "\
                           "correspond to item's type. The expected"\
                           " type is \"" << typeCode << "\"." << endl;
@@ -2403,7 +2407,7 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
                 {
                     log << "ERROR - In block \"" << block.GetName() <<
                       "\", value \"" << cell << "\" for \"" << cifItemName <<
-                      "\" is out of range" << endl;
+                      "\" is out of range, in row #" << l + 1 << endl;
                 }
             }
 
@@ -2436,23 +2440,28 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
 int CifFile::CheckCellRange(const string& cell, const string& typeCode, 
   const vector<string>& minlist, const vector<string>& maxlist)
 {
-
-    int matched = 1;
-
-    if (typeCode == "float")
+    try
     {
-        matched = CheckCellFloatRange(cell, minlist, maxlist);
-    }
-    else
-    {
-        if (typeCode == "int")
+        int matched = 1;
+
+        if (typeCode == "float")
         {
-            matched = CheckCellIntRange(cell, minlist, maxlist);
+            matched = CheckCellFloatRange(cell, minlist, maxlist);
         }
+        else
+        {
+            if (typeCode == "int")
+            {
+                matched = CheckCellIntRange(cell, minlist, maxlist);
+            }
+        }
+
+        return(matched);
     }
-
-    return(matched);
-
+    catch (exception)
+    {
+        return (1);
+    }
 }
 
 
