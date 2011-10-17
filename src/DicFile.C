@@ -14,6 +14,10 @@
 
 #include "GenString.h"
 #include "CifString.h"
+#ifdef VLAD_DO_WE_NEED_THIS
+#include "CifDataInfo.h"
+#include "CifParentChild.h"
+#endif
 #include "DicFile.h"
 
 
@@ -1014,4 +1018,100 @@ void DicFile::WriteItemAliases(ostream& cifo)
     }
 
 }
+
+
+#ifdef VLAD_DO_WE_NEED_THIS
+// If we fix types and report in CheckTypesAndRe...
+void DicFile::CheckParentChildTypes(const string& diagFileName)
+{
+    CifDataInfo cifDataInfo(*this);
+
+    Block& block = this->GetBlock(this->GetFirstBlockName());
+
+    CifParentChild cifParentChild(block);
+
+
+    //
+    vector<string> categories = cifDataInfo.GetCatNames();
+    sort(categories.begin(), categories.end());
+
+    // For all categories in the dictionary
+    for (unsigned int catI = 0; catI < categories.size(); ++catI)
+    {
+        const string& catName = categories[catI];
+
+        const vector<vector<string> >& origParComboKeys =
+          cifParentChild.GetComboKeys(catName);
+
+        for (unsigned int keyI = 0; keyI < origParComboKeys.size(); ++keyI)
+        {
+            const vector<string>& currOrigParComboKey = origParComboKeys[keyI];
+
+            vector<string> parKeyTypeCodes;
+
+            // Get parent key types
+            for (unsigned int parKeyI = 0;
+              parKeyI < currOrigParComboKey.size(); ++parKeyI)
+            {
+                const vector<string>& typeCodes =
+                  cifDataInfo.GetItemAttribute(currOrigParComboKey[parKeyI],
+                    "item_type", "code");
+
+                if (typeCodes.empty())
+                    cout << "NEW - ERROR - Empty type code for item \"" <<
+                      currOrigParComboKey[parKeyI] << "\"" << endl;
+               
+                if (typeCodes.size() > 1)
+                    cout <<
+                      "NEW - ERROR - More than one type code for item \"" <<
+                      currOrigParComboKey[parKeyI] << "\"" << endl;
+
+                parKeyTypeCodes.push_back(typeCodes[0]);
+
+                //cout << "NEW - INFO - Item \"" <<
+                //  currOrigParComboKey[parKeyI] << "\" has type code \"" <<
+                //  typeCodes[0] << "\"" << endl;
+            }
+
+            vector<vector<vector<string> > >& origChildrenKeys =
+              cifParentChild.GetChildrenKeys(currOrigParComboKey);
+
+            for (unsigned int childI = 0; childI < origChildrenKeys.size();
+              ++childI)
+            {
+                for (unsigned int childKeyI = 0; childKeyI <
+                  origChildrenKeys[childI].size(); ++childKeyI)
+                {
+                    const vector<string>& currChKey =
+                      origChildrenKeys[childI][childKeyI];
+
+                    for (unsigned int chKeyI = 0; chKeyI < currChKey.size();
+                      ++chKeyI)
+                    {
+                        const vector<string>& chTypeCodes =
+                          cifDataInfo.GetItemAttribute(currChKey[chKeyI],
+                            "item_type", "code");
+
+                        if (chTypeCodes.empty())
+                            cout << "NEW - ERROR - Empty type code for item \"" <<
+                              currChKey[chKeyI] << "\"" << endl;
+               
+                        if (chTypeCodes.size() > 1)
+                            cout <<
+                              "NEW - ERROR - More than one type code for item \"" <<
+                              currChKey[chKeyI] << "\"" << endl;
+                        if (chTypeCodes[0] != parKeyTypeCodes[chKeyI])
+                            cout <<
+                              "NEW - ERROR - Key mismatch between child item \"" << currChKey[chKeyI] << "\" with type code \"" << chTypeCodes[0] <<
+"\" and parent item \"" << currOrigParComboKey[chKeyI] << "\" with type code \"" << parKeyTypeCodes[chKeyI] << "\"" << endl;
+                    }
+                }
+            } // For every child key compare its types to the parent types
+            // eTypeCode iType = _dataInfo._GetDataType(itemName);
+        }
+    }
+    //
+
+}
+#endif
 

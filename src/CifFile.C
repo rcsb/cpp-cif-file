@@ -15,6 +15,7 @@
 // with is 0. This may happen if the value is empty !!
 
 #include <stdexcept>
+#include <set>
 
 #include "GenString.h"
 #include "RcsbFile.h"
@@ -27,8 +28,9 @@
 using std::exception;
 using std::runtime_error;
 using std::string;
-using std::vector;
 using std::make_pair;
+using std::vector;
+using std::set;
 using std::ofstream;
 using std::ostream;
 using std::ostringstream;
@@ -2386,7 +2388,7 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
                             if (where != itemAliasesP->GetNumRows())
                             {
                                 // Found that item has an alias
-                                log << " (it's alias is: \"" <<
+                                log << " (its alias is: \"" <<
                                   (*itemAliasesP)(where, "alias_name") << "\")";
                             }
                         }
@@ -2702,134 +2704,231 @@ int CifFile::CheckCellOtherEnum(const string& cell, const string& primCode,
 
 void CifFile::CheckAndRectifyItemTypeCode(Block& block, ostringstream& log)
 {
-    ISTable* parChildTableP = block.GetTablePtr("item_linked");
-
     ISTable* itemTypeTableP = block.GetTablePtr("item_type");
 
     ISTable* itemTableP = block.GetTablePtr("item");
 
-
-    if ((parChildTableP == NULL) || (itemTypeTableP == NULL) ||
-      (itemTableP == NULL))
+    if ((itemTypeTableP == NULL) || (itemTableP == NULL))
         return;
 
-    for (unsigned int cifItemI = 0; cifItemI < itemTableP->GetNumRows();
-      ++cifItemI)
+    // VLAD: Begin: Refactor this with GetCatNames()
+    ISTable* categoryTableP = block.GetTablePtr("category");
+    if (categoryTableP == NULL)
     {
-        const string& cifItemName = (*itemTableP)(cifItemI, "name");
+        log << "CRITICAL: CANNOT FIND DDL CATEGORY: " << "category" << endl;
+        return;
+    }
 
-        // Get item's type code
-        string itemTypeCode;
-        bool hasItemTypeCode = false;
-        vector<string> target;
-        target.push_back(cifItemName);
+    vector<string> categories;
+    categoryTableP->GetColumn(categories, "id");
+    // VLAD: End: Refactor this with GetCatNames()
 
-        vector<string> nameList;
-        nameList.push_back("name");
+    CifParentChild cifParentChild(block);
 
-        unsigned int iOut = itemTypeTableP->FindFirst(target, nameList);
-        if (iOut != itemTypeTableP->GetNumRows())
+    for (unsigned int catI = 0; catI < categories.size(); ++catI)
+    {
+        const string& catName = categories[catI];
+
+        // VLAD: Begin: Refactor this with GetCatItemsNames()
+        ISTable* itemCatP = block.GetTablePtr("item");
+        if (itemCatP == NULL)
         {
-            itemTypeCode = (*itemTypeTableP)(iOut, "code");
-            hasItemTypeCode = true;
+            log << "CRITICAL: CANNOT FIND DDL CATEGORY: " << "item" << endl;
+            return;
         }
 
-        if (!hasItemTypeCode)
+        vector<string> itemsNames;
+        // Get all items of a category
+        for (unsigned int itemI = 0; itemI < itemCatP->GetNumRows(); ++itemI)
         {
-            if (_extraChecks)
-            {
-                log << "ERROR - In block \"" << block.GetName() <<
-                  "\", \"_item_type.code\" not defined for item \"" <<
-                  cifItemName << "\"" << endl;
+            const string& itemName = (*itemCatP)(itemI, "name");
 
+            string itemCatName;
+            CifString::GetCategoryFromCifItem(itemCatName, itemName);
+
+            if (itemCatName == catName)
+            {
+                itemsNames.push_back(itemName);
+            }
+        }
+        // VLAD: end: Refactor this with GetCatItemsNames()
+
+        for (unsigned int itemI = 0; itemI < itemsNames.size(); ++itemI)
+        {
+            string itemTypeCode;
+            RectifyItemTypeCode(itemTypeCode, log, block, cifParentChild,
+              itemsNames[itemI]);
+        } // for (all items)
+    } // for (all categories)
+}
+
+
+void CifFile::RectifyItemTypeCode(string& retItemTypeCode,
+  std::ostringstream& log, Block& block, CifParentChild& cifParentChild,
+  const string& cifItemName)
+{
+    retItemTypeCode.clear();
+
+    string itemTypeCode;
+
+    vector<string> target;
+    target.push_back(cifItemName);
+
+    vector<string> nameList;
+    nameList.push_back("name");
+
+    ISTable* itemTypeTableP = block.GetTablePtr("item_type");
+
+    unsigned int iOut = itemTypeTableP->FindFirst(target, nameList);
+    if (iOut != itemTypeTableP->GetNumRows())
+    {
+        itemTypeCode = (*itemTypeTableP)(iOut, "code");
+    }
+
+    bool hasItemTypeCode = !itemTypeCode.empty();
+
+    if (!hasItemTypeCode)
+    {
+        if (_extraChecks)
+        {
+            log << "ERROR - In block \"" << block.GetName() <<
+              "\", \"_item_type.code\" not defined for item \"" <<
+              cifItemName << "\" and strict checking options prevent "\
+              "deducting its type from its parents" << endl;
+
+            return;
+        }
+    }
+
+    string catName;
+    CifString::GetCategoryFromCifItem(catName, cifItemName);
+
+    vector<vector<string> > parParKeys;
+    vector<vector<string> > comboComboKeys;
+
+    cifParentChild.GetParents(parParKeys, comboComboKeys, catName);
+
+    vector<pair<string, string> > parItemsAndTypes;
+
+    // VLAD - LATER - Change this to fomaly go via comboComboKeys iteration
+    for (unsigned int allParI = 0; allParI < parParKeys.size(); ++allParI)
+    {
+        vector<string>& parKeys = parParKeys[allParI];
+        vector<string>& comboKeys = comboComboKeys[allParI];
+
+        for (unsigned int keysI = 0; keysI < comboKeys.size(); ++keysI)
+        {
+            if (cifItemName != comboKeys[keysI])
+            {
                 continue;
             }
-        }
 
-        // Check item's parent's type code
-        string parTypeCode;
-
-        bool hasParTypeCode = false;
-
-        vector<string> childCifItem;
-        childCifItem.push_back(cifItemName);
-
-        vector<string> childNameCol;
-        childNameCol.push_back("child_name");
-
-        bool hasParents = true;
-
-        vector<unsigned int> parLoc;
-
-        parChildTableP->Search(parLoc, childCifItem, childNameCol);
-
-        if (parLoc.empty())
-        {
-            // This item does not have any parents
-            hasParents = false;
-        }
-
-        if (parLoc.size() > 1)
-        {
-            //cout << "BIG TROUBLE - CHILD HAS MULTIPLE PARENTS" << endl;
-            //exit(1);
-            continue;
-        }
-
-        for (unsigned int parLocI = 0; parLocI < parLoc.size(); ++parLocI)
-        {
-            target.clear();
-            target.push_back((*parChildTableP)(parLoc[parLocI], "parent_name"));
-
-            unsigned int iOut = (*itemTypeTableP).FindFirst(target, nameList);
-            if (iOut != itemTypeTableP->GetNumRows())
+            if (parKeys[keysI] == cifItemName)
             {
-                hasParTypeCode = true;
-                parTypeCode = (*itemTypeTableP)(iOut, "code");
-                break;
+                throw runtime_error("ERROR - Parent and child key have the "\
+                  "same value \"" + cifItemName + "\"");
             }
+
+            string parItemTypeCode;
+            RectifyItemTypeCode(parItemTypeCode, log, block, cifParentChild,
+              parKeys[keysI]);
+
+            parItemsAndTypes.push_back(make_pair(parKeys[keysI],
+              parItemTypeCode));
+        }
+    }
+
+#ifdef VLAD_DEBUG
+    log << "DEBUG - cifItem:parItemsAndTypes.size() \"" << cifItemName <<
+      ":" << parItemsAndTypes.size() << endl;
+#endif
+
+    bool hasParents = !parItemsAndTypes.empty();
+
+    // If no parents at all, set parType to null.
+    bool hasParTypeCode = false;
+
+    string parTypeCode;
+
+    if (hasParents)
+    {
+        set<string> parTypes;
+        for (unsigned int pairI = 0; pairI < parItemsAndTypes.size(); ++pairI)
+        {
+            parTypes.insert(parItemsAndTypes[pairI].second);
         }
 
-        if (!hasParents && !hasItemTypeCode)
-        {
-            // No type code in either the item or the parent
-            log << "ERROR - In block \"" << block.GetName() <<
-              "\", \"" << cifItemName << "\"" << 
-              " does not have item type code defined" << endl;
-            continue;
-        }
+        // If any type is empty string, report and return
 
-        if ((!hasParTypeCode) && (!hasItemTypeCode))
+        if (parTypes.size() > 1)
         {
-            log << "ERROR - In block \"" << block.GetName() <<
-              "\", parent item \"" << target[0] << "\"" <<
-              " of item \"" << cifItemName << "\"," <<
-              " does not have item type code defined" << endl;
-            continue;
-        }
+            log << "ERROR - Item \"" << cifItemName << "\" has parents "\
+              "with different types:" << endl;
 
-        if (hasItemTypeCode)
-        {
-            if (hasParTypeCode && (itemTypeCode != parTypeCode))
+            for (unsigned int pairI = 0; pairI < parItemsAndTypes.size();
+              ++pairI)
             {
-                log << "ERROR - In block \"" << block.GetName() <<
-                  "\", child item \"" << cifItemName <<
-                  "\" has item type code \"" << itemTypeCode <<
-                  "\", while its parent \"" << target[0] <<
-                  "\" has item type code \"" << parTypeCode << "\"" << endl;
+                log << "  Parent item \"" << parItemsAndTypes[pairI].first <<
+                  "\" has item type code \"" <<
+                  parItemsAndTypes[pairI].second << "\"" << endl;
             }
         }
         else
         {
-            // Add it to the "item_type" table of the item
-            itemTypeTableP->AddRow();
-            unsigned int lastRowInd = itemTypeTableP->GetNumRows() - 1;
-
-            itemTypeTableP->UpdateCell(lastRowInd, "name",
-              cifItemName);
-            itemTypeTableP->UpdateCell(lastRowInd, "code",
-              parTypeCode);
+            // Take it from the first parent
+            hasParTypeCode = true;
+            parTypeCode = parItemsAndTypes[0].second;
         }
+    }
+
+    if (!hasParents && !hasItemTypeCode)
+    {
+        // No type code in either the item or the parents
+        log << "ERROR - In block \"" << block.GetName() <<
+          "\", item \"" << cifItemName << "\"" << 
+          " does not have item type code defined and has no parents." << endl;
+        return;
+    }
+
+    if ((!hasParTypeCode) && (!hasItemTypeCode))
+    {
+        log << "ERROR - In block \"" << block.GetName() <<
+          "\", item \"" << cifItemName << "\"" <<
+          " does not have item type code defined and its item type code "\
+          " cannot be deducted from its parents." << endl;
+        return;
+    }
+
+    if (hasItemTypeCode)
+    {
+        retItemTypeCode = itemTypeCode;
+
+        if (hasParTypeCode && (itemTypeCode != parTypeCode))
+        {
+            log << "ERROR - In block \"" << block.GetName() <<
+              "\", child item \"" << cifItemName <<
+              "\" has item type code \"" << itemTypeCode <<
+              "\", while its parent(s) have item type code \"" <<
+              parTypeCode << "\"" << endl;
+        }
+    }
+    else
+    {
+#ifdef VLAD_TRACE
+        log << "INFO - For item \"" << cifItemName << "\", inserting parent "\
+          "item type code \"" << parTypeCode << "\"" << endl;
+#endif
+
+        // Add it to the "item_type" table of the item
+        itemTypeTableP->AddRow();
+        unsigned int lastRowInd = itemTypeTableP->GetNumRows() - 1;
+
+        itemTypeTableP->UpdateCell(lastRowInd, "name",
+          cifItemName);
+        itemTypeTableP->UpdateCell(lastRowInd, "code",
+          parTypeCode);
+
+        retItemTypeCode = parTypeCode;
     }
 }
 

@@ -29,6 +29,8 @@
 #include "GenString.h"
 #include "CifString.h"
 #include "TableFile.h"
+#include "CifParentChild.h"
+
 
 
 /**
@@ -627,6 +629,9 @@ class CifFile : public TableFile
       std::ostringstream& log);
 
     void CheckAndRectifyItemTypeCode(Block& block, std::ostringstream& log);
+    void RectifyItemTypeCode(std::string& retItemTypeCode,
+      std::ostringstream& log, Block& block, CifParentChild& cifParentChild,
+      const std::string& cifItemName);
 
     int CheckRegExpRangeEnum(Block& block, ISTable& catTable,
       const std::string& attribName, ISTable& itemTypeTable,

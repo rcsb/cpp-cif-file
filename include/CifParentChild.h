@@ -21,7 +21,6 @@
 
 #include "ISTable.h"
 #include "TableFile.h"
-#include "CifFile.h"
 #include "ParentChild.h"
 
 
