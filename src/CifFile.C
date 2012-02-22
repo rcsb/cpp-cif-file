@@ -2791,10 +2791,12 @@ void CifFile::RectifyItemTypeCode(string& retItemTypeCode,
     {
         if (_extraChecks)
         {
+#ifdef EXTENDED_CHECK_MESSAGE_SUPPRESSED
             log << "ERROR - In block \"" << block.GetName() <<
               "\", \"_item_type.code\" not defined for item \"" <<
               cifItemName << "\" and strict checking options prevent "\
               "deducting its type from its parents" << endl;
+#endif
 
             return;
         }
