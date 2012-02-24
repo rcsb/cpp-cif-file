@@ -727,8 +727,10 @@ void CifParentChild::WriteGroupTables(Block& block)
 
     tmpGroupTableP->DeleteColumn("parent_category_id");
 
-    block.WriteTable(tmpGroupTableP);
-    block.WriteTable(tmpGroupListTableP);
+    if (tmpGroupTableP->GetNumRows() != 0)
+        block.WriteTable(tmpGroupTableP);
+    if (tmpGroupListTableP->GetNumRows() != 0)
+        block.WriteTable(tmpGroupListTableP);
 }
 
 
