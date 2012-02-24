@@ -230,6 +230,11 @@ void CifParentChild::BuildOldTables(const vector<string>& cats,
 void CifParentChild::BuildNewTables(const vector<string>& cats, 
   const vector<vector<string> >& items)
 {
+    if (_parChildTableP == NULL)
+    {
+        return;
+    }
+
     // Maps a pair of child category/parent category to the last group
     // number used.
 

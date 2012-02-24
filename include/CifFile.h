@@ -635,8 +635,8 @@ class CifFile : public TableFile
 
     int CheckRegExpRangeEnum(Block& block, ISTable& catTable,
       const std::string& attribName, ISTable& itemTypeTable,
-      ISTable& itemTypeListTable, ISTable& itemRangeTable,
-      ISTable& itemEnumTable, ISTable& parChildTable, ISTable* itemAliasesP,
+      ISTable& itemTypeListTable, ISTable* itemRangeTableP,
+      ISTable* itemEnumTableP, ISTable& parChildTable, ISTable* itemAliasesP,
       std::ostringstream& log);
 
     int CheckCellRange(const std::string& cell, const std::string& typeCode,

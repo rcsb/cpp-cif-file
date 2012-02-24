@@ -1488,8 +1488,8 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
               colNames.size() << endl;
 #endif
             ret = CheckRegExpRangeEnum(block, *catTableP, colNames[colI],
-               *itemTypeTableP, *itemTypeListTableP, *itemRangeTableP,
-               *itemEnumTableP, *itemLinkedTableP, itemAliasesTableP, log);
+               *itemTypeTableP, *itemTypeListTableP, itemRangeTableP,
+               itemEnumTableP, *itemLinkedTableP, itemAliasesTableP, log);
         }
 
         // Check for null CIF string rows.
@@ -2226,8 +2226,8 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
 
 int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
   const string& attribName, ISTable& itemTypeTable, 
-  ISTable& itemTypeListTable, ISTable& itemRangeTable,
-  ISTable& itemEnumTable, ISTable& parChildTable,
+  ISTable& itemTypeListTable, ISTable* itemRangeTableP,
+  ISTable* itemEnumTableP, ISTable& parChildTable,
   ISTable* itemAliasesP, ostringstream& log)
 {
 
@@ -2315,25 +2315,31 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
 
     /************** RANGE step 1**************/
     vector<unsigned int> OutList;
-    itemRangeTable.Search(OutList, target, nameList);
-    if (!OutList.empty())
+    if (itemRangeTableP != NULL)
     {
-        errCodeRange = 0;
-        for (unsigned int l = 0; l < OutList.size(); ++l)
+        itemRangeTableP->Search(OutList, target, nameList);
+        if (!OutList.empty())
         {
-            maxlist.push_back(itemRangeTable(OutList[l], "maximum"));
-            minlist.push_back(itemRangeTable(OutList[l], "minimum"));
+            errCodeRange = 0;
+            for (unsigned int l = 0; l < OutList.size(); ++l)
+            {
+                maxlist.push_back((*itemRangeTableP)(OutList[l], "maximum"));
+                minlist.push_back((*itemRangeTableP)(OutList[l], "minimum"));
+            }
         }
     }
 
     /************ ENUMERATION step 1************/
-    itemEnumTable.Search(OutList, target, nameList);
-    if (!OutList.empty())
+    if (itemEnumTableP != NULL)
     {
-        errCodeEnumeration = 0;
-        for (unsigned int l = 0; l < OutList.size(); ++l)
+        itemEnumTableP->Search(OutList, target, nameList);
+        if (!OutList.empty())
         {
-            enumlist.push_back(itemEnumTable(OutList[l], "value"));
+            errCodeEnumeration = 0;
+            for (unsigned int l = 0; l < OutList.size(); ++l)
+            {
+                enumlist.push_back((*itemEnumTableP)(OutList[l], "value"));
+            }
         }
     }
 
