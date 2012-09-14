@@ -781,7 +781,7 @@ CifFile* DicFile::GetRefFile()
 {
 
     CifFile* refFileP = new CifFile();
-    
+ 
     refFileP->AddBlock("ref_block");
     Block& block = refFileP->GetBlock(refFileP->GetFirstBlockName());
 
@@ -831,8 +831,22 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "ndb_item_description", "no", "mmcif_ddl.dic"); 
     AddRefRow(*tableP, "ndb_item_enumeration", "no", "mmcif_ddl.dic"); 
     AddRefRow(*tableP, "ndb_item_examples", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "ndb_item_range", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "ndb_item_type", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "ndb_item", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_category_context", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_context", "no", "mmcif_ddl.dic"); 
     AddRefRow(*tableP, "pdbx_item_linked_group", "no", "mmcif_ddl.dic"); 
     AddRefRow(*tableP, "pdbx_item_linked_group_list", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_range", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_type", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_category_description", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_category_examples", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_description", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_enumeration", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "pdbx_item_examples", "no", "mmcif_ddl.dic"); 
+
 
     ISTable* itemTableP = new ISTable("item");
     itemTableP->AddColumn("name");
@@ -946,6 +960,18 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_ndb_item_examples.case"            ,"ndb_item_examples"     ,"yes");
     AddRefRow(*tableP, "_ndb_item_examples.detail"          ,"ndb_item_examples"     ,"yes");
     AddRefRow(*tableP, "_ndb_item_examples.name"            ,"ndb_item_examples"     ,"implicit"); 
+    AddRefRow(*tableP, "_ndb_item_range.ordinal"            ,"ndb_item_range"     ,"implicit-ordinal");
+    AddRefRow(*tableP, "_ndb_item_range.name"            ,"ndb_item_range"     ,"implicit");
+    AddRefRow(*tableP, "_ndb_item_range.minimum"            ,"ndb_item_range"     ,"yes");
+    AddRefRow(*tableP, "_ndb_item_range.maximum"            ,"ndb_item_range"     ,"yes");
+    AddRefRow(*tableP, "_ndb_item_type.name"            ,"ndb_item_type"     ,"implicit");
+    AddRefRow(*tableP, "_ndb_item_type.code"            ,"ndb_item_type"     ,"yes");
+    AddRefRow(*tableP, "_ndb_item.name"            ,"ndb_item"     ,"implicit");
+    AddRefRow(*tableP, "_ndb_item.mandatory_code"            ,"ndb_item"     ,"yes");
+    AddRefRow(*tableP, "_pdbx_category_context.category_id"            ,"pdbx_category_context"     ,"implicit");
+    AddRefRow(*tableP, "_pdbx_category_context.type"            ,"pdbx_category_context"     ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_context.item_name"            ,"pdbx_item_context"     ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_context.type"            ,"pdbx_item_context"     ,"yes");
     AddRefRow(*tableP, "_pdbx_item_linked_group.category_id","pdbx_item_linked_group","yes");
     AddRefRow(*tableP, "_pdbx_item_linked_group.link_group_id","pdbx_item_linked_group","yes");
     AddRefRow(*tableP, "_pdbx_item_linked_group.label"        ,"pdbx_item_linked_group","yes");
@@ -956,6 +982,27 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_pdbx_item_linked_group_list.child_name"    ,"pdbx_item_linked_group_list" ,"yes");
     AddRefRow(*tableP, "_pdbx_item_linked_group_list.parent_name"   ,"pdbx_item_linked_group_list" ,"yes");
     AddRefRow(*tableP, "_pdbx_item_linked_group_list.parent_category_id" ,"pdbx_item_linked_group_list" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_range.ordinal" ,"pdbx_item_range" ,"implicit-ordinal");
+    AddRefRow(*tableP, "_pdbx_item_range.name" ,"pdbx_item_range" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_range.minimum" ,"pdbx_item_range" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_range.maximum" ,"pdbx_item_range" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_type.name" ,"pdbx_item_type" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_type.code" ,"pdbx_item_type" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item.name" ,"pdbx_item" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item.mandatory_code" ,"pdbx_item" ,"yes");
+    AddRefRow(*tableP, "_pdbx_category_description.id" ,"pdbx_category_description" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_category_description.description" ,"pdbx_category_description" ,"yes");
+    AddRefRow(*tableP, "_pdbx_category_examples.id" ,"pdbx_category_examples" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_category_examples.case" ,"pdbx_category_examples" ,"yes");
+    AddRefRow(*tableP, "_pdbx_category_examples.detail" ,"pdbx_category_examples" ,"no");
+    AddRefRow(*tableP, "_pdbx_item_description.name" ,"pdbx_item_description" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_description.description" ,"pdbx_item_description" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_enumeration.name" ,"pdbx_item_enumeration" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_enumeration.value" ,"pdbx_item_enumeration" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_enumeration.detail" ,"pdbx_item_enumeration" ,"no");
+    AddRefRow(*tableP, "_pdbx_item_examples.name" ,"pdbx_item_examples" ,"implicit");
+    AddRefRow(*tableP, "_pdbx_item_examples.case" ,"pdbx_item_examples" ,"yes");
+    AddRefRow(*tableP, "_pdbx_item_examples.detail" ,"pdbx_item_examples" ,"no");
 
     block.WriteTable(catTableP);
     block.WriteTable(itemTableP);
