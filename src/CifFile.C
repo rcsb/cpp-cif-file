@@ -278,9 +278,10 @@ void CifFile::WriteNmrStar(const string& nmrStarFileName,
 
 
 int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
-  const bool extraChecks)
+  const bool extraDictChecks, const bool extraCifChecks)
 {
-    _extraChecks = extraChecks;
+    _extraDictChecks = extraDictChecks;
+    _extraCifChecks = extraCifChecks;
 
     int ret = 0;
 
@@ -307,7 +308,8 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
         ostringstream buf;
 
-        ret = DataChecking(block, refBlock, buf, extraChecks);
+        ret = DataChecking(block, refBlock, buf, extraDictChecks,
+          extraCifChecks);
 
         string sBuf = buf.str();
 
@@ -332,10 +334,11 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
 
 int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
-  const bool extraChecks)
+  const bool extraDictChecks, const bool extraCifChecks)
 {
 
-    _extraChecks = extraChecks;
+    _extraDictChecks = extraDictChecks;
+    _extraCifChecks = extraCifChecks;
 
     int ret1, ret2;
 
@@ -1394,18 +1397,49 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
     // category save frame is uppercase.
     catKeyTableP->SetFlags("id", ISTable::DT_STRING | ISTable::CASE_INSENSE);
 
-    ISTable* itemTableP = refBlock.GetTablePtr("item");
+    ISTable* itemTableP = NULL;
+    ISTable* itemTypeTableP = NULL;
+    ISTable* itemRangeTableP = NULL;
+    ISTable* itemEnumTableP = NULL;
+
+    if (_extraCifChecks)
+    {
+        itemTableP = refBlock.GetTablePtr("pdbx_item");
+        if (itemTableP == NULL)
+        {
+            itemTableP = refBlock.GetTablePtr("item");
+        }
+
+        itemTypeTableP = refBlock.GetTablePtr("pdbx_item_type");
+        if (itemTypeTableP == NULL)
+        {
+            itemTypeTableP = refBlock.GetTablePtr("item_type");
+        }
+
+        itemRangeTableP = refBlock.GetTablePtr("pdbx_item_range");
+        if (itemRangeTableP == NULL)
+        {
+            itemRangeTableP = refBlock.GetTablePtr("item_range");
+        }
+
+        itemEnumTableP = refBlock.GetTablePtr("pdbx_item_enumeration");
+        if (itemEnumTableP == NULL)
+        {
+            itemEnumTableP = refBlock.GetTablePtr("item_enumeration");
+        }
+    }
+    else
+    {
+        itemTableP = refBlock.GetTablePtr("item");
+        itemTypeTableP = refBlock.GetTablePtr("item_type");
+        itemRangeTableP = refBlock.GetTablePtr("item_range");
+        itemEnumTableP = refBlock.GetTablePtr("item_enumeration");
+    }
 
     ISTable* itemLinkedTableP = refBlock.GetTablePtr("item_linked");
 
-    ISTable* itemTypeTableP = refBlock.GetTablePtr("item_type");
-
     ISTable* itemTypeListTableP = refBlock.GetTablePtr("item_type_list");
   
-    ISTable* itemRangeTableP = refBlock.GetTablePtr("item_range");
-
-    ISTable* itemEnumTableP = refBlock.GetTablePtr("item_enumeration");
-
     ISTable* itemAliasesTableP = refBlock.GetTablePtr("item_aliases");
 
     CifParentChild parentChild(refBlock);
@@ -2795,7 +2829,7 @@ void CifFile::RectifyItemTypeCode(string& retItemTypeCode,
 
     if (!hasItemTypeCode)
     {
-        if (_extraChecks)
+        if (_extraDictChecks)
         {
 #ifdef EXTENDED_CHECK_MESSAGE_SUPPRESSED
             log << "ERROR - In block \"" << block.GetName() <<

@@ -398,9 +398,12 @@ class CifFile : public TableFile
     **    done against the first block in the dictionary file.
     **  \param[in] diagFileName - relative or absolute name of the file,
     **    where diagnostic information is stored.
-    **  \param[in] extraChecks - optional parameter that indicates whether to
-    **    perform additional, non-standard, checks. If not specified, those
-    **    checks are not performed.
+    **  \param[in] extraDictChecks - optional parameter that indicates whether
+    **    to perform additional, non-standard, dictionary checks. If not
+    **    specified, those checks are not performed.
+    **  \param[in] extraCifChecks - optional parameter that indicates whether
+    **    to perform additional, non-standard, CIF checks. If not specified,
+    **    those checks are not performed.
     **
     **  \return 0 - if all checks passed
     **  \return different than 0 - if checks failed
@@ -412,7 +415,7 @@ class CifFile : public TableFile
     **  \exception: None
     */
     int DataChecking(CifFile& dicRef, const std::string& diagFileName,
-      const bool extraChecks = false);
+      const bool extraDictChecks = false, const bool extraCifChecks = false);
 
     /**
     **  Checks a block of CIF file against the specified reference block.
@@ -421,9 +424,12 @@ class CifFile : public TableFile
     **  \param[in] refBlock - reference to a reference block against which
     **    \e block is to be checked
     **  \param[out] diagBuf - diagnostics buffer that holds checking results
-    **  \param[in] extraChecks - optional parameter that indicates whether to
-    **    perform additional, non-standard, checks. If not specified, those
+    **  \param[in] extraDictChecks - optional parameter that indicates whether
+    **    to perform additional, non-standard, checks. If not specified, those
     **    checks are not performed.
+    **  \param[in] extraCifChecks - optional parameter that indicates whether
+    **    to perform additional, non-standard, CIF checks. If not specified,
+    **    those checks are not performed.
     **
     **  \return 0 - if all checks passed
     **  \return different than 0 - if checks failed
@@ -435,7 +441,7 @@ class CifFile : public TableFile
     **  \exception: None
     */
     int DataChecking(Block& block, Block& refBlock, std::ostringstream& buf,
-      const bool extraChecks = false);
+      const bool extraDictChecks = false, const bool extraCifChecks = false);
 
     /**
     **  Sets enumerations checking option for case-insensitive types.
@@ -607,7 +613,8 @@ class CifFile : public TableFile
   private:
     std::string _srcFileName;
 
-    bool _extraChecks;
+    bool _extraDictChecks;
+    bool _extraCifChecks;
 
     void Init();
 
