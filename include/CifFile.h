@@ -621,6 +621,18 @@ class CifFile : public TableFile
     bool IsCatDefinedInRef(const std::string& catName, ISTable& catTable);
     bool IsItemDefinedInRef(const std::string& catName,
       const std::string& itemName, ISTable& refItemTable);
+    bool IsImplicitNatureKey(const string& catName, const string& attribName,
+      ISTable& itemTable);
+    void GetImplNatureKeysWithMissingValues(vector<string>& implKeyItems,
+      const string& catName, ISTable& catTable, ISTable& refItemTable);
+    void GetImplNatureKeys(vector<string>& implNatureKeys,
+      const string& catName, ISTable& refItemTable);
+    bool AreSomeValuesInColumnEmpty(ISTable& table, const string& colName);
+    void FixMissingValuesOfImplNatureKeys(ISTable& catTable,
+      const vector<string>& implNatureKeys, ISTable& refItemDefaultTable,
+      std::ostringstream& log);
+    void GetItemDefaultValue(string& defValue, const string& implNatKey,
+      ISTable& refItemDefaultTable);
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
       ISTable& keyTable, std::ostringstream& log);
     void CheckKeyValues(const std::vector<std::string>& keyItems,
@@ -629,7 +641,8 @@ class CifFile : public TableFile
     void GetKeyAttributes(std::vector<std::string>& keyAttributes,
       const std::string& catTableName, ISTable& catKeyTable);
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
-      const std::vector<std::string>& keyAttributes, std::ostringstream& log);
+      const std::vector<std::string>& keyAttributes, ISTable& itemTable,
+      ISTable& itemDefaultTable, std::ostringstream& log);
 
     void CheckMandatoryItems(const std::string& blockName, ISTable& catTable,
       ISTable& refItemTable, const std::vector<std::string>& keyItems,

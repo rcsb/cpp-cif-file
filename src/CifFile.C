@@ -1442,6 +1442,8 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
   
     ISTable* itemAliasesTableP = refBlock.GetTablePtr("item_aliases");
 
+    ISTable* itemDefaultTableP = refBlock.GetTablePtr("item_default");
+
     CifParentChild parentChild(refBlock);
 
     vector<string> catNames;
@@ -1497,7 +1499,8 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
 
         GetKeyAttributes(keyAttributes, catTableP->GetName(), *catKeyTableP);
 
-        CheckKeyItems(block.GetName(), *catTableP, keyAttributes, log);
+        CheckKeyItems(block.GetName(), *catTableP, keyAttributes, *itemTableP,
+          *itemDefaultTableP, log);
 
         CheckMandatoryItems(block.GetName(), *catTableP, *itemTableP,
           keyAttributes, log);
@@ -2083,9 +2086,9 @@ void CifFile::GetKeyAttributes(vector<string>& keyAttributes,
 
 
 void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
-  const vector<string>& keyItems, ostringstream& log)
+  const vector<string>& keyItems, ISTable& itemTable,
+  ISTable& itemDefaultTable, ostringstream& log)
 {
-
     /*
     ** For a category, method checks for existence of key
     ** items and checks if there are duplicate key values.
@@ -2104,55 +2107,86 @@ void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
     {
         if (!catTable.IsColumnPresent(keyItems[k]))
         {
+            // Missing implicit key values are allowed
+            if (IsImplicitNatureKey(catTable.GetName(), keyItems[k],
+              itemTable))
+            {
+                continue;
+            }
+
             log << "ERROR - In block \"" << blockName << "\", key item \"" <<
               keyItems[k] << "\" not found in category \"" <<
               catTable.GetName() << "\"" << endl;
+
             keyNotFound = true;
         }
     }
 
-    if (!keyNotFound)
+    if (keyNotFound)
     {
-        // Check the values of key items
-        CheckKeyValues(keyItems, catTable, log);
-
-        vector<pair<unsigned int, unsigned int> > duplRows;
-        catTable.FindDuplicateRows(duplRows, keyItems, true);
-        if (!duplRows.empty())
-        {
-            for (unsigned int rowI = 0; rowI < duplRows.size(); rowI++)
-            {
-                bool report = true;
-                for (unsigned int keyI = 0; keyI < keyItems.size(); ++keyI)
-                {
-                    const string& cell = catTable(duplRows[rowI].first,
-                      keyItems[keyI]);
-                 
-                    if (CifString::IsEmptyValue(cell))
-                    {
-                        report = false;
-                        break;
-                    }
-                }
-
-                if (!report)
-                    continue;
-
-                log << "ERROR - In block \"" << blockName << "\", in " <<
-                  "cateogory \"" << catTable.GetName() <<
-                  "\", values for key item(s):" << endl;
-
-                for (unsigned int keyI = 0; keyI < keyItems.size(); ++keyI)
-                {
-                    log << "  \"" << keyItems[keyI] << "\"," << endl; 
-                }
-
-                log << "  in row #" << duplRows[rowI].first + 1 <<
-                  " are repeated in row #" << duplRows[rowI].second + 1 << endl;
-            }
-        }
+        return;
     }
 
+    /*
+    ** If any of the keys are implicit in nature and no values are present
+    ** for them, a copy of a category table has to be created, missing values
+    ** filled from default item values and that new category table be
+    ** validated.
+    */
+
+    ISTable* valCatTableP = &catTable;
+
+    vector<string> implKeyItems;
+    GetImplNatureKeysWithMissingValues(implKeyItems, catTable.GetName(),
+      catTable, itemTable);
+
+    if (!implKeyItems.empty())
+    {
+        // Make a copy of category table that is to be fixed
+        valCatTableP = new ISTable(catTable);
+
+        FixMissingValuesOfImplNatureKeys(*valCatTableP, implKeyItems,
+          itemDefaultTable, log);
+    }
+
+    // Check the values of key items
+    CheckKeyValues(keyItems, *valCatTableP, log);
+
+    vector<pair<unsigned int, unsigned int> > duplRows;
+    (*valCatTableP).FindDuplicateRows(duplRows, keyItems, true);
+    if (!duplRows.empty())
+    {
+        for (unsigned int rowI = 0; rowI < duplRows.size(); rowI++)
+        {
+            bool report = true;
+            for (unsigned int keyI = 0; keyI < keyItems.size(); ++keyI)
+            {
+                const string& cell = (*valCatTableP)(duplRows[rowI].first,
+                  keyItems[keyI]);
+             
+                if (CifString::IsEmptyValue(cell))
+                {
+                    report = false;
+                    break;
+                }
+            }
+
+            if (!report)
+                continue;
+
+            log << "ERROR - In block \"" << blockName << "\", in " <<
+              "cateogory \"" << (*valCatTableP).GetName() <<
+              "\", values for key item(s):" << endl;
+
+            for (unsigned int keyI = 0; keyI < keyItems.size(); ++keyI)
+            {
+                log << "  \"" << keyItems[keyI] << "\"," << endl; 
+            }
+
+            log << "  in row #" << duplRows[rowI].first + 1 <<
+              " are repeated in row #" << duplRows[rowI].second + 1 << endl;
+        }
+    }
 }
 
 
@@ -3047,4 +3081,176 @@ void CifFile::CheckKeyValues(const vector<string>& keysAttribs,
         }
     }
 }
+
+
+bool CifFile::IsImplicitNatureKey(const string& catName,
+  const string& attribName, ISTable& itemTable)
+{
+    vector<string> refItemList;
+    refItemList.push_back("name");
+    refItemList.push_back("mandatory_code");
+
+    string cifItem;
+    CifString::MakeCifItem(cifItem, catName, attribName);
+
+    vector<string> refItemTarget;
+    refItemTarget.push_back(cifItem);
+    refItemTarget.push_back("implicit");
+
+    vector<unsigned int> OutList;
+    itemTable.Search(OutList, refItemTarget, refItemList);
+    if (!OutList.empty())
+    {
+        return true;
+    }
+
+    refItemTarget[1] = "implicit-ordinal";
+ 
+    itemTable.Search(OutList, refItemTarget, refItemList);
+    if (!OutList.empty())
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+void CifFile::GetImplNatureKeysWithMissingValues(vector<string>& implKeyItems,
+  const string& catName, ISTable& catTable, ISTable& refItemTable)
+{
+    // Return vector of keys (as CIF items) having implicit nature for which
+    // some of values in the category table are unknown
+    implKeyItems.clear();
+
+    vector<string> allImplNatKeyItems;
+    GetImplNatureKeys(allImplNatKeyItems, catName, refItemTable);
+
+    for (unsigned int keyInd = 0; keyInd < allImplNatKeyItems.size(); ++keyInd)
+    {
+        string attribName;
+        CifString::GetItemFromCifItem(attribName, allImplNatKeyItems[keyInd]);
+
+        if (AreSomeValuesInColumnEmpty(catTable, attribName))
+        {
+            implKeyItems.push_back(allImplNatKeyItems[keyInd]);
+        }
+    }
+}
+
+
+void CifFile::FixMissingValuesOfImplNatureKeys(ISTable& catTable,
+  const vector<string>& implNatureKeys, ISTable& refItemDefaultTable,
+  ostringstream& log)
+{
+    for (unsigned int keyInd = 0; keyInd < implNatureKeys.size(); ++keyInd)
+    {
+        string defValue;
+        GetItemDefaultValue(defValue, implNatureKeys[keyInd],
+          refItemDefaultTable);
+
+        if (CifString::IsEmptyValue(defValue))
+        {
+            log << "ERROR - mandatory implicit item \"" <<
+              implNatureKeys[keyInd] << "\" has no default value defined" <<
+              endl;
+            continue;
+        }
+
+        string attribName;
+        CifString::GetItemFromCifItem(attribName, implNatureKeys[keyInd]);
+        if (!catTable.IsColumnPresent(attribName))
+        {
+            catTable.AddColumn(attribName);
+        }
+
+        for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
+        {
+            const string& value = catTable(rowI, attribName);
+
+            if (CifString::IsEmptyValue(value))
+            {
+                catTable.UpdateCell(rowI, attribName, defValue);
+            }
+        }
+    }
+}
+
+
+void CifFile::GetImplNatureKeys(vector<string>& implNatureKeys,
+  const string& catName, ISTable& refItemTable)
+{
+    implNatureKeys.clear();
+
+    vector<string> attribsNames;
+    attribsNames.push_back("category_id");
+    attribsNames.push_back("mandatory_code");
+
+    vector<string> targetsValues;
+    targetsValues.push_back(catName);
+    targetsValues.push_back("implicit");
+
+    vector<unsigned int> matchRowInds;
+    refItemTable.Search(matchRowInds, targetsValues, attribsNames);
+
+    for (unsigned int matchInd = 0; matchInd < matchRowInds.size(); ++matchInd)
+    {
+        implNatureKeys.push_back(refItemTable(matchRowInds[matchInd], "name"));
+    }
+    
+    // VLAD - TODO - For implicit-ordinal. IMPLEMENT LATER WHEN STABLE
+    /*
+    matchRowInds.clear();
+    targetsValues[1] = "implicit-ordinal";
+
+    refItemTable.Search(matchRowInds, targetsValues, attribsNames);
+
+    for (matchInd = 0; matchInd < matchRowInds.size(); ++matchInd)
+    {
+        implNatureKeys.push_back(refItemTable(matchRowInds[mathInd], "name"));
+    }
+    */
+}
+
+
+bool CifFile::AreSomeValuesInColumnEmpty(ISTable& table, const string& colName)
+{
+    if (!table.IsColumnPresent(colName))
+    {
+        return true;
+    }
+
+    for (unsigned int rowI = 0; rowI < table.GetNumRows(); ++rowI)
+    {
+        const string& value = table(rowI, colName);
+
+        if (CifString::IsEmptyValue(value))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+void CifFile::GetItemDefaultValue(string& defValue, const string& implNatKey,
+  ISTable& refItemDefaultTable)
+{
+    defValue.clear();
+
+    vector<string> attribsNames;
+    attribsNames.push_back("name");
+
+    vector<string> targetsValues;
+    targetsValues.push_back(implNatKey);
+
+    unsigned int iOut = refItemDefaultTable.FindFirst(targetsValues,
+      attribsNames);
+    if (iOut != refItemDefaultTable.GetNumRows())
+    {
+        defValue = refItemDefaultTable(iOut, "value");
+    }
+}
+
 
