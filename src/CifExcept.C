@@ -275,6 +275,11 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_pdbx_validate_chiral.omega")
         return (true);
 
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_related_exp_data_set.data_reference")
+        return (true);
+
     return (false);
 }
 
