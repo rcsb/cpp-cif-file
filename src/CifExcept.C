@@ -280,6 +280,16 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_pdbx_related_exp_data_set.data_reference")
         return (true);
 
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_struct_conn_angle.ptnr1_label_seq_id")
+        return (true);
+
+    // Non-key, mandatory, child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_struct_conn_angle.ptnr2_label_seq_id")
+        return (true);
+
     return (false);
 }
 
