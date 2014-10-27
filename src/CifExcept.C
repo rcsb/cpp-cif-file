@@ -295,6 +295,36 @@ bool CifExcept::CanBeInapplicable(const string& itemName)
     else if (itemName == "_pdbx_related_exp_data_set.data_set_type")
         return (true);
 
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.n_subunits_divisor")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.number_of_operations")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.rise_per_n_subunits")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.rotation_per_n_subunits")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.dyad_axis")
+        return (true);
+
+    // Non-key, mandatory, non-child, non-parent; It seems that this item
+    // is always set to '.'
+    else if (itemName == "_pdbx_helical_symmetry.circular_symmetry")
+        return (true);
+
     return (false);
 }
 
