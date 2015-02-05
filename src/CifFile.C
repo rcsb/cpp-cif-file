@@ -67,6 +67,21 @@ CifFile::CifFile(const bool verbose, const Char::eCompareType caseSense,
 }
 
 
+CifFile::CifFile(const bool fake, const bool verbose,
+  const unsigned int intCaseSense, const unsigned int maxLineLength,
+  const string& nullValue) :
+  TableFile((Char::eCompareType)intCaseSense)
+{
+
+    Init();
+
+    _maxCifLineLength = maxLineLength;
+    _nullValue = nullValue;
+    _verbose = verbose;
+
+}
+
+
 CifFile::~CifFile()
 {
 

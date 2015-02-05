@@ -125,6 +125,12 @@ class CifFile : public TableFile
       const unsigned int maxLineLength = STD_CIF_LINE_LENGTH,
       const std::string& nullValue = CifString::UnknownValue);
 
+    /* Fake method to export the above method to other languages. */
+    CifFile(const bool fake, const bool verbose,
+      const unsigned int intCaseSense = 0,
+      const unsigned int maxLineLength = STD_CIF_LINE_LENGTH,
+      const std::string& nullValue = CifString::UnknownValue);
+
     /**
     **  Destructs a CIF file, by releasing all consumed resources.
     **
