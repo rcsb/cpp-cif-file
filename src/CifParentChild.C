@@ -325,6 +325,7 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
     vector<vector<string> > parParKeys; 
     vector<vector<string> > comboComboKeys;
 
+    // DEBUG PrintAllParents(parParKeys, comboComboKeys, childCatName);
     GetParents(parParKeys, comboComboKeys, childCatName);
 
 
@@ -347,6 +348,25 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
     {
         vector<string>& parKeys = parParKeys[allParI];
         vector<string>& comboKeys = comboComboKeys[allParI];
+
+#ifdef VLAD_DEBUG
+        cout << "  parKeys.size: " << parKeys.size() << endl;
+        cout << "  comboComboKeys.size: " << comboComboKeys.size() << endl;
+        cout << "  parKeys (";
+        for (unsigned int aaaI = 0; aaaI < parKeys.size(); ++aaaI)
+        {
+            cout << parKeys[aaaI];
+            if (aaaI != (parKeys.size() - 1))
+                cout << ", ";
+        }
+        cout << ")" << endl;
+#endif
+
+        if (parKeys.empty())
+        {
+            // No parent keys
+            continue;
+        }
 
         string parCatName;
         CifString::GetCategoryFromCifItem(parCatName, parKeys[0]);
