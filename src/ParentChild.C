@@ -506,23 +506,24 @@ void ParentChild::GetParents(vector<vector<string> >& parParKeys,
 }
 
 
-#ifdef VLAD_IMPLEMENT_LATER
 void ParentChild::PrintAllParents(vector<vector<string> >& parParKeys,
   vector<vector<string > >& comboComboKeys, const string& childCat)
 {
+    cout << "Child: \"" << childCat << "\"" << endl;
+
     // For every parent with combo keys
     for (map<string, vector<vector<string> > >::iterator pos =
       _parComboKeys.begin(); pos != _parComboKeys.end(); ++pos)
     {
         vector<vector<string> >& parKeys = pos->second;
 
-        cout << "Parent: \"" << pos->first << "\"" << endl;
+        cout << "  Parent: \"" << pos->first << "\"" << endl;
 
         // For every combo parent key
         for (unsigned int parKeysI = 0; parKeysI < parKeys.size(); ++parKeysI)
         {
             vector<string>& parKey = parKeys[parKeysI];
-            count << "  Parent key (";
+            cout << "  Parent key (";
             
             for (unsigned int keyI = 0; keyI < parKey.size(); ++keyI)
             {
@@ -531,6 +532,7 @@ void ParentChild::PrintAllParents(vector<vector<string> >& parParKeys,
                     cout << ", ";
             } 
 
+            cout << ")" << endl;
             // See if it exists in children
 
             for (map<vector<string>,
@@ -555,17 +557,22 @@ void ParentChild::PrintAllParents(vector<vector<string> >& parParKeys,
 
                 for (unsigned int kI = 0; kI < childComboKeys.size(); ++kI)
                 {        
-                    vector<string>& childKey = childComboKeys[kI];
-
                     comboComboKeys.push_back(childComboKeys[kI]);
+                    for (unsigned int sI = 0; sI < childComboKeys[kI].size();
+                      ++sI)
+                    {
+                        cout << "    Child key (";
+                        cout << childComboKeys[kI][sI];
+                        if (sI != (childComboKeys[kI].size() - 1))
+                            cout << ", ";
+                    }
+                    cout << ")" << endl;
+
                 }
-                // WARNIIIIIIIIIIIIIIIIIIINIG
-                break;
             }
-        } 
+        }
     }
 }
-#endif
 
 
 void ParentChild::GetLinkGroupIdLabel(string& linkGroupIdLabel,
