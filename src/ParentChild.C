@@ -160,8 +160,24 @@ void ParentChild::UpdateParComboKeys(const string& parName,
     {
         // Found the parent
         // Search parent for the keys in order to avoid duplication
-        if (find((pos->second).begin(), (pos->second).end(), parKeys) ==
-           (pos->second).end())
+
+        vector<vector<string> >& keys = pos->second;
+
+        bool found = false;
+        for (unsigned int vecInd = 0; vecInd < keys.size(); ++vecInd)
+        {
+            // Order of keys is not important, so use sets for comparison
+            set<string> existingKeySet(keys[vecInd].begin(),
+              keys[vecInd].end());
+            set<string> parKeySet(parKeys.begin(), parKeys.end());
+            if (existingKeySet == parKeySet)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
         {
             // These keys do not exist. Add them to the parent.
             (pos->second).push_back(parKeys);
@@ -506,8 +522,7 @@ void ParentChild::GetParents(vector<vector<string> >& parParKeys,
 }
 
 
-void ParentChild::PrintAllParents(vector<vector<string> >& parParKeys,
-  vector<vector<string > >& comboComboKeys, const string& childCat)
+void ParentChild::PrintAllParents(const string& childCat, std::vector<std::vector<std::string> >& comboComboKeys)
 {
     cout << "Child: \"" << childCat << "\"" << endl;
 

@@ -38,9 +38,7 @@ class ParentChild
       std::vector<std::vector<std::string> >& comboComboKeys,
       const std::string& childCat);
 
-    void PrintAllParents(std::vector<std::vector<std::string> >& parParKeys,
-      std::vector<std::vector<std::string> >& comboComboKeys,
-      const std::string& childCat);
+    void PrintAllParents(const std::string& childCat, std::vector<std::vector<std::string> >& comboComboKeys);
 
     void GetLinkGroupIdLabel(std::string& linkGroupIdLabel,
       const std::vector<std::string>& parKeys,
