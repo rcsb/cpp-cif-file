@@ -1515,7 +1515,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
         GetKeyAttributes(keyAttributes, catTableP->GetName(), *catKeyTableP);
 
         CheckKeyItems(block.GetName(), *catTableP, keyAttributes, *itemTableP,
-          *itemDefaultTableP, log);
+          itemDefaultTableP, log);
 
         CheckMandatoryItems(block.GetName(), *catTableP, *itemTableP,
           keyAttributes, log);
@@ -2102,7 +2102,7 @@ void CifFile::GetKeyAttributes(vector<string>& keyAttributes,
 
 void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
   const vector<string>& keyItems, ISTable& itemTable,
-  ISTable& itemDefaultTable, ostringstream& log)
+  ISTable* itemDefaultTableP, ostringstream& log)
 {
     /*
     ** For a category, method checks for existence of key
@@ -2142,6 +2142,11 @@ void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
         return;
     }
 
+    if (itemDefaultTableP == NULL)
+    {
+        return;
+    }
+
     /*
     ** If any of the keys are implicit in nature and no values are present
     ** for them, a copy of a category table has to be created, missing values
@@ -2161,7 +2166,7 @@ void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
         valCatTableP = new ISTable(catTable);
 
         FixMissingValuesOfImplNatureKeys(*valCatTableP, implKeyItems,
-          itemDefaultTable, log);
+          *itemDefaultTableP, log);
     }
 
     // Check the values of key items

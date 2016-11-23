@@ -648,7 +648,7 @@ class CifFile : public TableFile
       const std::string& catTableName, ISTable& catKeyTable);
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
       const std::vector<std::string>& keyAttributes, ISTable& itemTable,
-      ISTable& itemDefaultTable, std::ostringstream& log);
+      ISTable* itemDefaultTableP, std::ostringstream& log);
 
     void CheckMandatoryItems(const std::string& blockName, ISTable& catTable,
       ISTable& refItemTable, const std::vector<std::string>& keyItems,
