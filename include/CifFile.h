@@ -11,7 +11,7 @@
 */
 
 
-/* 
+/*
   PURPOSE:    Base class for read/write cif files
 */
 
@@ -261,7 +261,7 @@ class CifFile : public TableFile
     **  \exception: None
     */
     unsigned int GetQuoting();
- 
+
     /**
     **  This method is used in order to control how single row categories are
     **  written: in form of a "loop_" construct or as an item-value pair.
@@ -296,7 +296,7 @@ class CifFile : public TableFile
     **  \exception: None
     */
     bool GetLooping(const std::string& catName);
- 
+
     /**
     **  Writes the data out to a text file.
     **
@@ -541,9 +541,9 @@ class CifFile : public TableFile
     void GetAttributeValues(std::vector<std::string>& strings,
       const std::string& blockId,
       const std::string& category, const std::string& attribute);
-    void GetAttributeValuesIf(std::vector<std::string>& strings, 
+    void GetAttributeValuesIf(std::vector<std::string>& strings,
       const std::string& blockId, const std::string& category,
-      const std::string& attributeA, 
+      const std::string& attributeA,
       const std::string& attributeB, const std::string& valB);
 
     void SetAttributeValues(const std::string& blockId,
