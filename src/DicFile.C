@@ -132,8 +132,8 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
   ISTable *cattbl2 = NULL;
   ISTable *itemtbl = NULL;
   ISTable *itemtblddl = NULL;
-  
-  
+
+
   unsigned int numColumn;
 
   int k, ilen;
@@ -148,7 +148,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
   string item2;
   vector<string> TableNames;
   string BlockName;
- 
+
   vector<string> list;
   vector<string> list2;
   vector<string> listcat;
@@ -174,18 +174,18 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
   list.push_back("dbName");
   list.push_back("type");
 
-  /* 
+  /*
      This is loop for all datablocks - we have to assume that dictionary might have more then one datablock
   */
-  
+
   for (unsigned int ib0 = 0; ib0 < _blocks.size(); ++ib0)
   {
     string loopBlockName = _blocks[ib0].GetName();
 
     Block& block = GetBlock(loopBlockName);
 
-#if DEBUG    
-    cerr <<  "Writing data block " << loopBlockName << "["<< ib0 << " of " 
+#if DEBUG
+    cerr <<  "Writing data block " << loopBlockName << "["<< ib0 << " of "
 	 << _blocks.size() << "]"<< " Null is " << _nullValue << endl;
 #endif
 
@@ -225,7 +225,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	      ilen = colNames[i].size();
 	      if (ilen > cwid) cwid=ilen;
 	    }
-	
+
 	    for (unsigned int i=0; i< numColumn; i++)
             {
               linePos = 0;
@@ -235,8 +235,8 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	      for (k=0; k < 2+cwid-ilen; k++)
                   cifo << " ";
 	      linePos = cwid+2;
-	  
-	      cifo << _nullValue; 
+
+	      cifo << _nullValue;
 	      if (linePos != 0) cifo << endl;
 	    }
 	  }
@@ -251,7 +251,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
             ilen = colNames[i].size();
             if (  ilen > cwid) cwid=ilen;
           }
-      
+
           for (unsigned int i=0; i< numColumn; i++)
           {
             linePos = 0;
@@ -261,7 +261,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
             for (k=0; k < 2+cwid-ilen; k++)
               cifo << " ";
             linePos = cwid+2;
-	  
+
 	    _PrintItemValue(cifo, rowValues[i], linePos);
 	    if (linePos != 0)
               cifo << endl;
@@ -270,7 +270,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
         else
         {
 	  cifo << "loop_" << endl;
-	
+
           const vector<string>& colNames = tblP->GetColumnNames();
 	  for (unsigned int i=0; i< numColumn; i++)
           {
@@ -279,10 +279,10 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
             _PrintPostItemSeparator(cifo, linePos);
 	    cifo << endl;
 	  }
-	
+
 	  // ---
 	  cwidth  = new int[numColumn];
-      
+
 	  for (unsigned int i=0; i< numColumn; i++) { cwidth[i]=-1+2; }
 	  unsigned int j = 0;
 	  unsigned int m = 0;
@@ -313,7 +313,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
             {
 	      for (unsigned int i=0; i< numColumn; i++)
               {
-	        ilen=_PrintItemValue(cifo, rowValues[i], linePos); 
+	        ilen=_PrintItemValue(cifo, rowValues[i], linePos);
 	        if (linePos != 0)
                 {
 		  if (linePos + cwidth[i]-2-ilen < _maxCifLineLength)
@@ -354,7 +354,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
     listitem.clear();
     listitem.push_back("name");
 
-    // Creates index on table category, in ddl and dictionary, on column 
+    // Creates index on table category, in ddl and dictionary, on column
     // named id and index on columns id+implicit_key
     // Assumtion that ddl has table category, and that table hase column id
     // and implicit_key
@@ -407,7 +407,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
         String::UpperCase(categoryName, catName);
         cifo << "save_" <<catName << endl;
         listOut.clear();
-        // searchs in table format all row with <datablock_name> in column 
+        // searchs in table format all row with <datablock_name> in column
         // "dbName" and "category" in column "type"
         // that will find category, category_examples....
         // in all this tables are information wich have to be placed in
@@ -426,7 +426,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	    // other tables implicit value is name of save frame
 	    // assumption: in table item in ddl in column named implicit
 	    // is defined wich colum has implicit value
-	    // for table category, implicit value "imlicit_key" is name of 
+	    // for table category, implicit value "imlicit_key" is name of
 	    // datablock, "id"= name of save frame
 	    if (!String::IsCiEqual(categoryName2,"category"))
             {
@@ -448,7 +448,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	      item2 = "id";
 	    listcat2.clear();
 	    listcat2.push_back(item2);
-	
+
 	    targetcat2.clear();
 	    targetcat2.push_back(categoryName);
 	    listOutcat2.clear();
@@ -472,14 +472,14 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	          if (  ilen > cwid)
                     cwid=ilen;
 	        }
-	    
+
 	        for (unsigned int i=0; i< numColumn; i++)
                 {
                   _PrintItemIdent(cifo, linePos);
 	          _PrintItemName(cifo, categoryName2, colNames[i], linePos);
                   _PrintPostItemSeparator(cifo, linePos, true);
 	          _PrintItemValue(cifo, rowValues[i], linePos);
-	          if (linePos != 0) 
+	          if (linePos != 0)
                     cifo << endl;
 	        }
 	      }
@@ -496,10 +496,10 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
                   _PrintPostItemSeparator(cifo, linePos, true);
 	          cifo << endl;
 	        }
-	
+
 	        // ---
 	        cwidth  = new int[numColumn];
-	  
+
 	        for (unsigned int i=0; i< numColumn; i++)
                 {
                   cwidth[i]=-1+2;
@@ -513,7 +513,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	              ilen = rowValues[i].size();
 	              if ( _IsQuotableText(rowValues[i]))
                         ilen+=2;
-	      
+
 	              if (  ilen > cwidth[i])
                         cwidth[i]=ilen;
 	          }
@@ -525,7 +525,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	            cattbl2->GetRow(listOutcat2[j]);
 	          for (unsigned int i=0; i< numColumn; i++)
                   {
-	            ilen=_PrintItemValue(cifo, rowValues[i], linePos,eNONE,cwidth[i]); 
+	            ilen=_PrintItemValue(cifo, rowValues[i], linePos,eNONE,cwidth[i]);
 	          }
 	          if (linePos != 0) cifo << endl;
 	        }
@@ -556,7 +556,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 
 	      listOut.clear();
 	      formatP->Search(listOut, target2, list);
-	
+
               if (!listOut.empty())
               {
                 // writes values for particular item like atom_site.aniso_B[1][1]
@@ -586,7 +586,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	            CifString::GetItemFromCifItem(item2, itemName2);
 	            listcat2.clear();
 	            listcat2.push_back(item2);
-	
+
 	            targetcat2.clear();
 	            targetcat2.push_back(itemName);
 	            listOutcat2.clear();
@@ -609,7 +609,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	                  ilen = colNames[i].size();
 	                  if (  ilen > cwid) cwid=ilen;
 	                }
-	    
+
 	                for (unsigned int i=0; i< numColumn; i++)
                         {
 	                  linePos=8; //**************
@@ -620,7 +620,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	                  if (linePos != 0) cifo << endl;
 	                }
 	              }
-	  
+
 	              if (listOutcat2.size() > 1)
                       {
 	                // loop
@@ -635,10 +635,10 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
                           _PrintPostItemSeparator(cifo, linePos, true);
 	                  cifo << endl;
 	                }
-	    
+
 	                // ---
 	                cwidth  = new int[numColumn];
-	    
+
       	                for (unsigned int i=0; i< numColumn; i++) { cwidth[i]=-1+2; }
 	                for (unsigned int j=0; j < listOutcat2.size(); ++j)
                         {
@@ -648,7 +648,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
                             {
 		              ilen = rowValues[i].size();
 		              if ( _IsQuotableText(rowValues[i])) ilen+=2;
-		
+
 		              if (  ilen > cwidth[i]) cwidth[i]=ilen;
 	                }
 	              }
@@ -659,12 +659,12 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
 	                  cattbl2->GetRow(listOutcat2[j]);
 	                for (unsigned int i=0; i< numColumn; i++)
                         {
-		
-		          ilen=_PrintItemValue(cifo, rowValues[i], linePos,eNONE,cwidth[i]); 
+
+		          ilen=_PrintItemValue(cifo, rowValues[i], linePos,eNONE,cwidth[i]);
 	                }
 	                if (linePos != 0) cifo << endl;
 	              }
-	    
+
 	              if (cwidth) delete[] cwidth;
 	            }
 	          }
@@ -679,7 +679,7 @@ int DicFile::WriteFormatted(ostream& cifo, TableFile* ddl, ISTable* formatP)
     }
   }
 
-  return(1); 
+  return(1);
 
 }
 
@@ -754,7 +754,7 @@ void DicFile::Compress(CifFile* ddl)
                     for (unsigned int colI = 0; colI < colNames.size(); ++colI)
                     {
                            cout << colNames[colI] << "    ";
-                    } 
+                    }
                     cout << endl;
 
                     for (unsigned int duplI = 0; duplI < duplRows.size();
@@ -781,7 +781,7 @@ CifFile* DicFile::GetRefFile()
 {
 
     CifFile* refFileP = new CifFile();
- 
+
     refFileP->AddBlock("ref_block");
     Block& block = refFileP->GetBlock(refFileP->GetFirstBlockName());
 
@@ -793,59 +793,59 @@ CifFile* DicFile::GetRefFile()
     ISTable* tableP = catTableP;
 
     AddRefRow(*tableP, "datablock", "no", "mmcif_ddl.dic");
-    AddRefRow(*tableP, "datablock_methods", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category_key", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category_group", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category_group_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "category_methods", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "sub_category", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "sub_category_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "sub_category_methods", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_aliases", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_default", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_dependent", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_description", "yes", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_enumeration", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_linked", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_methods", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_range", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_related", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_structure", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_structure_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_sub_category", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_type", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_type_conditions", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_type_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_units", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_units_conversion", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "item_units_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "method_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "dictionary", "yes", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "dictionary_history", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_category_description", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_category_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item_description", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item_enumeration", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item_range", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item_type", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "ndb_item", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_category_context", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_context", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_linked_group", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_linked_group_list", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_range", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_type", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_category_description", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_category_examples", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_description", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_enumeration", "no", "mmcif_ddl.dic"); 
-    AddRefRow(*tableP, "pdbx_item_examples", "no", "mmcif_ddl.dic"); 
+    AddRefRow(*tableP, "datablock_methods", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category_key", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category_group", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category_group_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "category_methods", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "sub_category", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "sub_category_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "sub_category_methods", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_aliases", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_default", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_dependent", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_description", "yes", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_enumeration", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_linked", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_methods", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_range", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_related", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_structure", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_structure_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_sub_category", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_type", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_type_conditions", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_type_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_units", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_units_conversion", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "item_units_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "method_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "dictionary", "yes", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "dictionary_history", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_category_description", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_category_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item_description", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item_enumeration", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item_range", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item_type", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "ndb_item", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_category_context", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_context", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_linked_group", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_linked_group_list", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_range", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_type", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_category_description", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_category_examples", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_description", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_enumeration", "no", "mmcif_ddl.dic");
+    AddRefRow(*tableP, "pdbx_item_examples", "no", "mmcif_ddl.dic");
 
 
     ISTable* itemTableP = new ISTable("item");
@@ -855,25 +855,25 @@ CifFile* DicFile::GetRefFile()
 
     tableP = itemTableP;
 
-    AddRefRow(*tableP, "_datablock.id","datablock","implicit"); 
+    AddRefRow(*tableP, "_datablock.id","datablock","implicit");
     AddRefRow(*tableP, "_datablock.description","datablock","yes");
-    AddRefRow(*tableP, "_datablock_methods.datablock_id","datablock_methods","implicit"); 
+    AddRefRow(*tableP, "_datablock_methods.datablock_id","datablock_methods","implicit");
     AddRefRow(*tableP, "_datablock_methods.method_id","datablock_methods","yes");
     AddRefRow(*tableP, "_category.id","category","yes");
     AddRefRow(*tableP, "_category.description","category","yes");
-    AddRefRow(*tableP, "_category.implicit_key","category","implicit"); 
+    AddRefRow(*tableP, "_category.implicit_key","category","implicit");
     AddRefRow(*tableP, "_category.mandatory_code","category","yes");
-    AddRefRow(*tableP, "_category_examples.id","category_examples","implicit"); 
+    AddRefRow(*tableP, "_category_examples.id","category_examples","implicit");
     AddRefRow(*tableP, "_category_examples.case","category_examples","yes");
     AddRefRow(*tableP, "_category_examples.detail","category_examples","no");
     AddRefRow(*tableP, "_category_key.name","category_key","yes");
-    AddRefRow(*tableP, "_category_key.id","category_key","implicit"); 
+    AddRefRow(*tableP, "_category_key.id","category_key","implicit");
     AddRefRow(*tableP, "_category_group.id","category_group","yes");
-    AddRefRow(*tableP, "_category_group.category_id","category_group"              ,"implicit"); 
+    AddRefRow(*tableP, "_category_group.category_id","category_group"              ,"implicit");
     AddRefRow(*tableP, "_category_group_list.id","category_group_list"         ,"yes");
     AddRefRow(*tableP, "_category_group_list.description","category_group_list"         ,"yes");
     AddRefRow(*tableP, "_category_group_list.parent_id","category_group_list"         ,"no");
-    AddRefRow(*tableP, "_category_methods.category_id","category_methods"            ,"implicit"); 
+    AddRefRow(*tableP, "_category_methods.category_id","category_methods"            ,"implicit");
     AddRefRow(*tableP, "_category_methods.method_id","category_methods"            ,"yes");
     AddRefRow(*tableP, "_sub_category.id"           ,"sub_category"                ,"yes");
     AddRefRow(*tableP, "_sub_category.description","sub_category"                ,"yes");
@@ -882,53 +882,53 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_sub_category_examples.detail","sub_category_examples"       ,"no");
     AddRefRow(*tableP, "_sub_category_methods.sub_category_id","sub_category_methods"        ,"yes");
     AddRefRow(*tableP, "_sub_category_methods.method_id"                 ,"sub_category_methods"        ,"yes");
-    AddRefRow(*tableP, "_item.name","item"                        ,"implicit"); 
+    AddRefRow(*tableP, "_item.name","item"                        ,"implicit");
     AddRefRow(*tableP, "_item.mandatory_code","item"                        ,"yes");
-    AddRefRow(*tableP, "_item.category_id" ,"item"                        ,"implicit"); 
-    AddRefRow(*tableP, "_item_aliases.name","item_aliases"                ,"implicit"); 
+    AddRefRow(*tableP, "_item.category_id" ,"item"                        ,"implicit");
+    AddRefRow(*tableP, "_item_aliases.name","item_aliases"                ,"implicit");
     AddRefRow(*tableP, "_item_aliases.alias_name" ,"item_aliases"                ,"yes");
     AddRefRow(*tableP, "_item_aliases.dictionary" ,"item_aliases"                ,"yes");
     AddRefRow(*tableP, "_item_aliases.version"    ,"item_aliases"                ,"yes");
-    AddRefRow(*tableP, "_item_default.name"       ,"item_default"                ,"implicit"); 
+    AddRefRow(*tableP, "_item_default.name"       ,"item_default"                ,"implicit");
     AddRefRow(*tableP, "_item_default.value"      ,"item_default"                ,"no");
-    AddRefRow(*tableP, "_item_dependent.name"     ,"item_dependent"              ,"implicit"); 
+    AddRefRow(*tableP, "_item_dependent.name"     ,"item_dependent"              ,"implicit");
     AddRefRow(*tableP, "_item_dependent.dependent_name" ,"item_dependent"  ,"yes");
-    AddRefRow(*tableP, "_item_description.name"         ,"item_description","implicit"); 
+    AddRefRow(*tableP, "_item_description.name"         ,"item_description","implicit");
     AddRefRow(*tableP, "_item_description.description"  ,"item_description","yes");
-    AddRefRow(*tableP, "_item_enumeration.name"         ,"item_enumeration","implicit"); 
+    AddRefRow(*tableP, "_item_enumeration.name"         ,"item_enumeration","implicit");
     AddRefRow(*tableP, "_item_enumeration.value"        ,"item_enumeration","yes");
     AddRefRow(*tableP, "_item_enumeration.detail"       ,"item_enumeration","no");
-    AddRefRow(*tableP, "_item_examples.name"            ,"item_examples"   ,"implicit"); 
+    AddRefRow(*tableP, "_item_examples.name"            ,"item_examples"   ,"implicit");
     AddRefRow(*tableP, "_item_examples.case"            ,"item_examples"   ,"yes");
     AddRefRow(*tableP, "_item_examples.detail"          ,"item_examples"   ,"no");
     AddRefRow(*tableP, "_item_linked.child_name"        ,"item_linked"     ,"yes");
-    AddRefRow(*tableP, "_item_linked.parent_name"       ,"item_linked"     ,"implicit"); 
-    AddRefRow(*tableP, "_item_methods.name"             ,"item_methods"    ,"implicit"); 
+    AddRefRow(*tableP, "_item_linked.parent_name"       ,"item_linked"     ,"implicit");
+    AddRefRow(*tableP, "_item_methods.name"             ,"item_methods"    ,"implicit");
     AddRefRow(*tableP, "_item_methods.method_id"        ,"item_methods"    ,"yes");
-    AddRefRow(*tableP, "_item_range.name"               ,"item_range"      ,"implicit"); 
+    AddRefRow(*tableP, "_item_range.name"               ,"item_range"      ,"implicit");
     AddRefRow(*tableP, "_item_range.minimum"            ,"item_range"      ,"yes");
     AddRefRow(*tableP, "_item_range.maximum"            ,"item_range"      ,"yes");
     AddRefRow(*tableP, "_item_range.ordinal"            ,"item_range"      ,"implicit-ordinal");
-    AddRefRow(*tableP, "_item_related.name"             ,"item_related"    ,"implicit"); 
+    AddRefRow(*tableP, "_item_related.name"             ,"item_related"    ,"implicit");
     AddRefRow(*tableP, "_item_related.related_name"     ,"item_related"    ,"yes");
     AddRefRow(*tableP, "_item_related.function_code"    ,"item_related"    ,"yes");
-    AddRefRow(*tableP, "_item_structure.name"           ,"item_structure"  ,"implicit"); 
+    AddRefRow(*tableP, "_item_structure.name"           ,"item_structure"  ,"implicit");
     AddRefRow(*tableP, "_item_structure.code"           ,"item_structure"  ,"yes");
     AddRefRow(*tableP, "_item_structure.organization"   ,"item_structure"  ,"yes");
     AddRefRow(*tableP, "_item_structure_list.code"      ,"item_structure_list" ,"yes");
     AddRefRow(*tableP, "_item_structure_list.index"     ,"item_structure_list" ,"yes");
     AddRefRow(*tableP, "_item_structure_list.dimension" ,"item_structure_list" ,"yes");
-    AddRefRow(*tableP, "_item_sub_category.name"        ,"item_sub_category"   ,"implicit"); 
+    AddRefRow(*tableP, "_item_sub_category.name"        ,"item_sub_category"   ,"implicit");
     AddRefRow(*tableP, "_item_sub_category.id"          ,"item_sub_category"   ,"yes");
-    AddRefRow(*tableP, "_item_type.name"                ,"item_type"           ,"implicit"); 
+    AddRefRow(*tableP, "_item_type.name"                ,"item_type"           ,"implicit");
     AddRefRow(*tableP, "_item_type.code"                ,"item_type"           ,"yes");
-    AddRefRow(*tableP, "_item_type_conditions.name"     ,"item_type_conditions","implicit"); 
+    AddRefRow(*tableP, "_item_type_conditions.name"     ,"item_type_conditions","implicit");
     AddRefRow(*tableP, "_item_type_conditions.code"     ,"item_type_conditions","yes");
     AddRefRow(*tableP, "_item_type_list.code"           ,"item_type_list"      ,"yes");
     AddRefRow(*tableP, "_item_type_list.primitive_code" ,"item_type_list"      ,"yes");
     AddRefRow(*tableP, "_item_type_list.construct"      ,"item_type_list"      ,"no");
     AddRefRow(*tableP, "_item_type_list.detail"         ,"item_type_list"      ,"no");
-    AddRefRow(*tableP, "_item_units.name"               ,"item_units"          ,"implicit"); 
+    AddRefRow(*tableP, "_item_units.name"               ,"item_units"          ,"implicit");
     AddRefRow(*tableP, "_item_units.code"               ,"item_units"          ,"yes");
     AddRefRow(*tableP, "_item_units_conversion.from_code" ,"item_units_conversion","yes");
     AddRefRow(*tableP, "_item_units_conversion.to_code"   ,"item_units_conversion","yes");
@@ -938,28 +938,30 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_item_units_list.detail"          ,"item_units_list"      ,"no");
     AddRefRow(*tableP, "_method_list.id"                  ,"method_list"          ,"yes");
     AddRefRow(*tableP, "_method_list.detail"              ,"method_list"          ,"no");
-    AddRefRow(*tableP, "_method_list.inline"              ,"method_list"          ,"yes");
+    AddRefRow(*tableP, "_method_list.inline"              ,"method_list"          ,"no");
+    AddRefRow(*tableP, "_method_list.implementation"           ,"method_list"     ,"no");
+    AddRefRow(*tableP, "_method_list.implementation_source"    ,"method_list"     ,"no");
     AddRefRow(*tableP, "_method_list.code"                ,"method_list"          ,"yes");
     AddRefRow(*tableP, "_method_list.language"            ,"method_list"          ,"yes");
-    AddRefRow(*tableP, "_dictionary.datablock_id"         ,"dictionary"           ,"implicit"); 
+    AddRefRow(*tableP, "_dictionary.datablock_id"         ,"dictionary"           ,"implicit");
     AddRefRow(*tableP, "_dictionary.title"                ,"dictionary"           ,"yes");
     AddRefRow(*tableP, "_dictionary.version"              ,"dictionary"           ,"yes");
     AddRefRow(*tableP, "_dictionary_history.version"      ,"dictionary_history"   ,"yes");
     AddRefRow(*tableP, "_dictionary_history.update"       ,"dictionary_history"   ,"yes");
     AddRefRow(*tableP, "_dictionary_history.revision"     ,"dictionary_history"   ,"yes");
-    AddRefRow(*tableP, "_ndb_category_description.id"     ,"ndb_category_description","implicit"); 
+    AddRefRow(*tableP, "_ndb_category_description.id"     ,"ndb_category_description","implicit");
     AddRefRow(*tableP, "_ndb_category_description.description" ,"ndb_category_description"    ,"yes");
-    AddRefRow(*tableP, "_ndb_category_examples.id"          ,"ndb_category_examples" ,"implicit"); 
+    AddRefRow(*tableP, "_ndb_category_examples.id"          ,"ndb_category_examples" ,"implicit");
     AddRefRow(*tableP, "_ndb_category_examples.case"        ,"ndb_category_examples" ,"yes");
     AddRefRow(*tableP, "_ndb_category_examples.detail"      ,"ndb_category_examples" ,"no");
-    AddRefRow(*tableP, "_ndb_item_description.name"         ,"ndb_item_description"  ,"implicit"); 
+    AddRefRow(*tableP, "_ndb_item_description.name"         ,"ndb_item_description"  ,"implicit");
     AddRefRow(*tableP, "_ndb_item_description.description"  ,"ndb_item_description"  ,"yes");
-    AddRefRow(*tableP, "_ndb_item_enumeration.name"         ,"ndb_item_enumeration"  ,"implicit"); 
+    AddRefRow(*tableP, "_ndb_item_enumeration.name"         ,"ndb_item_enumeration"  ,"implicit");
     AddRefRow(*tableP, "_ndb_item_enumeration.value"        ,"ndb_item_enumeration"  ,"yes");
     AddRefRow(*tableP, "_ndb_item_enumeration.detail"       ,"ndb_item_enumeration"  ,"no");
     AddRefRow(*tableP, "_ndb_item_examples.case"            ,"ndb_item_examples"     ,"yes");
     AddRefRow(*tableP, "_ndb_item_examples.detail"          ,"ndb_item_examples"     ,"yes");
-    AddRefRow(*tableP, "_ndb_item_examples.name"            ,"ndb_item_examples"     ,"implicit"); 
+    AddRefRow(*tableP, "_ndb_item_examples.name"            ,"ndb_item_examples"     ,"implicit");
     AddRefRow(*tableP, "_ndb_item_range.ordinal"            ,"ndb_item_range"     ,"implicit-ordinal");
     AddRefRow(*tableP, "_ndb_item_range.name"            ,"ndb_item_range"     ,"implicit");
     AddRefRow(*tableP, "_ndb_item_range.minimum"            ,"ndb_item_range"     ,"yes");
@@ -1107,7 +1109,7 @@ void DicFile::CheckParentChildTypes(const string& diagFileName)
                 if (typeCodes.empty())
                     cout << "NEW - ERROR - Empty type code for item \"" <<
                       currOrigParComboKey[parKeyI] << "\"" << endl;
-               
+
                 if (typeCodes.size() > 1)
                     cout <<
                       "NEW - ERROR - More than one type code for item \"" <<
@@ -1142,7 +1144,7 @@ void DicFile::CheckParentChildTypes(const string& diagFileName)
                         if (chTypeCodes.empty())
                             cout << "NEW - ERROR - Empty type code for item \"" <<
                               currChKey[chKeyI] << "\"" << endl;
-               
+
                         if (chTypeCodes.size() > 1)
                             cout <<
                               "NEW - ERROR - More than one type code for item \"" <<
