@@ -2554,7 +2554,7 @@ int CifFile::CheckCellRange(const string& cell, const string& typeCode,
 
         return(matched);
     }
-    catch (exception)
+    catch (exception& exc)
     {
         return (1);
     }
