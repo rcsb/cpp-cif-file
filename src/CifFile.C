@@ -2461,7 +2461,7 @@ int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
                 else
                 {
                     int len = pmatch[0].rm_eo - pmatch[0].rm_so;
-                    if ((len != (int)(cell.size())) && (typeCode != "text"))
+                    if ((len != (int)(cell.size())) && (typeCode != "text") && (typeCode != "symop"))
                     {
                         log << "ERROR - In block \"" << block.GetName() <<
                           "\", in item \"" << cifItemName << "\"";

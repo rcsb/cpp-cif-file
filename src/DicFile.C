@@ -897,9 +897,10 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_item_dependent.dependent_name" ,"item_dependent"  ,"yes");
     AddRefRow(*tableP, "_item_description.name"         ,"item_description","implicit"); 
     AddRefRow(*tableP, "_item_description.description"  ,"item_description","yes");
-    AddRefRow(*tableP, "_item_enumeration.name"         ,"item_enumeration","implicit"); 
+    AddRefRow(*tableP, "_item_enumeration.name"         ,"item_enumeration","implicit");
     AddRefRow(*tableP, "_item_enumeration.value"        ,"item_enumeration","yes");
     AddRefRow(*tableP, "_item_enumeration.detail"       ,"item_enumeration","no");
+    AddRefRow(*tableP, "_item_enumeration.pdbx_value_display" ,"item_enumeration","no");
     AddRefRow(*tableP, "_item_examples.name"            ,"item_examples"   ,"implicit"); 
     AddRefRow(*tableP, "_item_examples.case"            ,"item_examples"   ,"yes");
     AddRefRow(*tableP, "_item_examples.detail"          ,"item_examples"   ,"no");
@@ -1002,6 +1003,7 @@ CifFile* DicFile::GetRefFile()
     AddRefRow(*tableP, "_pdbx_item_enumeration.name" ,"pdbx_item_enumeration" ,"implicit");
     AddRefRow(*tableP, "_pdbx_item_enumeration.value" ,"pdbx_item_enumeration" ,"yes");
     AddRefRow(*tableP, "_pdbx_item_enumeration.detail" ,"pdbx_item_enumeration" ,"no");
+    AddRefRow(*tableP, "_pdbx_item_enumeration.value_display" ,"pdbx_item_enumeration" ,"no");    
     AddRefRow(*tableP, "_pdbx_item_examples.name" ,"pdbx_item_examples" ,"implicit");
     AddRefRow(*tableP, "_pdbx_item_examples.case" ,"pdbx_item_examples" ,"yes");
     AddRefRow(*tableP, "_pdbx_item_examples.detail" ,"pdbx_item_examples" ,"no");

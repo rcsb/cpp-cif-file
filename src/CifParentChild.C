@@ -338,6 +338,32 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
         return(ret);
     }
 
+    bool has_multiple_model = false;
+    if (childCatName == "pdbx_entity_nonpoly") {
+         ISTable* t_ptr = block.GetTablePtr("atom_site");
+         if (t_ptr && (t_ptr->GetNumRows() > 1) && t_ptr->IsColumnPresent("pdbx_PDB_model_num")) {
+              const string& cifItem_first = (*t_ptr)(0, "pdbx_PDB_model_num");
+              const string& cifItem_last = (*t_ptr)(t_ptr->GetNumRows() - 1, "pdbx_PDB_model_num");
+              if (cifItem_first != cifItem_last) has_multiple_model = true;
+         }
+    }
+
+    bool has_linear_polymer = false;
+    ISTable* entity_ptr = block.GetTablePtr("entity");
+    if (entity_ptr && entity_ptr->IsColumnPresent("type")) {
+         for (unsigned int rowI = 0; rowI < entity_ptr->GetNumRows(); ++rowI) {
+              const string& cifItem = (*entity_ptr)(rowI, "type");
+              if (cifItem == "polymer") {
+                   has_linear_polymer = true;
+                   break;
+              }
+         }
+    }
+    std::string first_model_num = "";
+    if ((catTable.GetName() == "atom_site") && catTable.IsColumnPresent("pdbx_PDB_model_num")) {
+         first_model_num = catTable(0, "pdbx_PDB_model_num");
+    }
+
     vector<string> cifItemNames;
     CifString::MakeCifItems(cifItemNames, catTable.GetName(),
       catTable.GetColumnNames());
@@ -370,6 +396,8 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
 
         string parCatName;
         CifString::GetCategoryFromCifItem(parCatName, parKeys[0]);
+
+        if (has_multiple_model && (catTable.GetName() == "pdbx_entity_nonpoly") && (parCatName == "pdbx_nonpoly_scheme")) continue;
 
 #if JW_DEBUG
         cout << "Current category "    <<  catTable.GetName() << endl;
@@ -460,13 +488,16 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
             if (parKeyNonEmptyValues.empty())
                 continue;
 
+            bool check_flag = true;
+            if ((catTable.GetName() == "atom_site") && ((parCatName == "entity_poly_seq") || (parCatName == "pdbx_poly_seq_scheme")) &&
+                !has_linear_polymer) check_flag = false;
+
 #ifndef VLAD_FIX_SINGLE_KEY_UNKNOWN_VALUE_NOT_REPORT_PARENT
             if (!block.IsTablePresent(parCatName))
             {
                 // Parent table does not exist. Ignore this fact.
 #ifdef JW_HACK
-                if (parCatName != "chem_comp_atom" &&
-                 parCatName != "atom_sites_alt")
+                if ((parCatName != "chem_comp_atom") && (parCatName != "atom_sites_alt") && check_flag)
                 {
                    log << "++ERROR - In block \"" << block.GetName() <<
                      "\", parent category \"" << parCatName <<
@@ -481,12 +512,17 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
             if (parentCatTableP->GetNumRows() == 0)
             {
 #ifdef JW_HACK
-                log << "WARN - In block " << block.GetName() << " category " <<
-                  catTable.GetName() << " parent table empty " << parCatName <<
-                 endl;
+                if (check_flag) log << "WARN - In block " << block.GetName() << " category " <<
+                             catTable.GetName() << " parent table empty " << parCatName << endl;
 #endif
                  // Parent table has no rows. Ignore this fact.
                  break;
+            }
+
+            bool check_row_flag = true;
+            if ((catTable.GetName() == "atom_site") && catTable.IsColumnPresent("pdbx_PDB_model_num")) {
+                 const string& cifItem = catTable(l, "pdbx_PDB_model_num");
+                 if (cifItem != first_model_num) check_row_flag = false;
             }
 
             // Check existence in the parent
@@ -645,7 +681,7 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
                     unsigned int searchIndex =
                       parentCatTableP->FindFirst(parKeyNonEmptyValues,
                         parKeyNonEmptyItems);
-                    if (searchIndex == parentCatTableP->GetNumRows())
+                    if ((searchIndex == parentCatTableP->GetNumRows()) && check_row_flag)
                     {
 #ifdef OLD_IMPL
                         log << "ERROR - In block \"" << block.GetName()
