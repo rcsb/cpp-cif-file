@@ -293,7 +293,8 @@ void CifFile::WriteNmrStar(const string& nmrStarFileName,
 
 
 int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
-  const bool extraDictChecks, const bool extraCifChecks)
+  const bool extraDictChecks, const bool extraCifChecks,
+  const std::vector<std::string>& skipBlockNames)
 {
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
@@ -321,6 +322,13 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
     {
         Block& block = GetBlock(BlockNames[blockI]);
 
+	if (skipBlockNames.size() > 0) {
+	  std::string bName = block.GetName();
+	  if (std::find(skipBlockNames.begin(), skipBlockNames.end(), bName) != skipBlockNames.end()) {
+	      continue;
+	  }
+	}
+	
         ostringstream buf;
 
         ret = DataChecking(block, refBlock, buf, extraDictChecks,
