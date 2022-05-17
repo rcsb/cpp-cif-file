@@ -16,6 +16,7 @@
 
 #include <stdexcept>
 #include <set>
+#include <algorithm>
 
 #include "GenString.h"
 #include "RcsbFile.h"
