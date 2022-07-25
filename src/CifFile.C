@@ -441,6 +441,8 @@ int CifFile::_IsQuotableText(const string& itemValue)
       return(1);
   if (String::IsCiEqual(itemValue.substr(0, 5), "save_"))
       return(1);
+  if (String::IsCiEqual(itemValue.substr(0, 5), "stop_"))
+      return(1);
 
   return(0);
 
@@ -646,6 +648,8 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
     if (String::IsCiEqual(itemValue.substr(0, 5), "loop_"))
         multipleWord = true;
     if (String::IsCiEqual(itemValue.substr(0, 5), "save_"))
+        multipleWord = true;
+    if (String::IsCiEqual(itemValue.substr(0, 5), "stop_"))
         multipleWord = true;
 
     if (embeddedQuotes && multipleWord)
@@ -883,6 +887,8 @@ int CifFile::_PrintItemNameInHeader(ostream& cifo, const string& itemValue,
     if (String::IsCiEqual(itemValue.substr(0, 5), "loop_"))
         multipleWord = true;
     if (String::IsCiEqual(itemValue.substr(0, 5), "save_"))
+        multipleWord = true;
+    if (String::IsCiEqual(itemValue.substr(0, 5), "stop_"))
         multipleWord = true;
 
     if (embeddedQuotes && multipleWord)
