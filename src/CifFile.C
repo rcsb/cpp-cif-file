@@ -413,6 +413,9 @@ int CifFile::_IsQuotableText(const string& itemValue)
       if (itemValue[i] == ' ')
           return(1);
 
+      if (itemValue[i] == '\t')
+          return(1);
+      
       if (itemValue[i] == '\n')
           return(1);
 
@@ -613,7 +616,7 @@ int CifFile::_PrintItemValue(ostream& cifo, const string& itemValue,
 
     for (unsigned int i = 0; i < str_len; i++)
     {
-        if (itemValue[i] == ' ')
+        if (itemValue[i] == ' ' || itemValue[i] == '\t')
             multipleWord = true;
         else if (itemValue[i] == '\n')
             multipleLine = true;
