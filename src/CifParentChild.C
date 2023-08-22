@@ -497,7 +497,8 @@ int CifParentChild::CheckParentChild(Block& block, ISTable& catTable,
             {
                 // Parent table does not exist. Ignore this fact.
 #ifdef JW_HACK
-                if ((parCatName != "chem_comp_atom") && (parCatName != "atom_sites_alt") && check_flag)
+                if ((parCatName != "chem_comp_atom") && (parCatName != "atom_sites_alt") &&
+		    (parCatName != "pdbx_nonpoly_scheme") && check_flag)
                 {
                    log << "++ERROR - In block \"" << block.GetName() <<
                      "\", parent category \"" << parCatName <<
