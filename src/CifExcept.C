@@ -905,7 +905,10 @@ bool CifExcept::CanRepresentAsScientific(const string& itemName)
        return (true);
     else if (itemName == "_struct_ncs_oper.vector[3]")
        return (true);
-    
+    else if (itemName == "_struct_ncs_oper.vector[3]")
+       return (true);
+    else if (itemName == "_refine_ls_restr_ncs.rms_dev_position")
+       return (true);
 
     return (false);
 }
