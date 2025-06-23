@@ -32,7 +32,6 @@
 #include "CifParentChild.h"
 
 
-
 /**
 **  \class CifFile
 **
@@ -560,6 +559,7 @@ class CifFile : public TableFile
 
     int CheckCategories(Block& block, Block& refBlock, std::ostringstream& log);
     void CheckCategoryKey(Block& block, std::ostringstream& log);
+    void CheckCategorySecondaryKey(Block& block, std::ostringstream& log);
     void CheckItemsTable(Block& block, std::ostringstream& log);
     int CheckItems(Block& block, Block& refBlock, std::ostringstream& log);
 
@@ -646,15 +646,24 @@ class CifFile : public TableFile
       ISTable& keyTable, std::ostringstream& log);
     void CheckKeyValues(const std::vector<std::string>& keyItems,
       ISTable& catTable, std::ostringstream& log);
-
+    void CheckSecondaryKeyValues(const std::vector<std::pair<std::string, std::string> >& keyItems,
+      ISTable& catTable, std::ostringstream& log);
     void GetKeyAttributes(std::vector<std::string>& keyAttributes,
+      const std::string& catTableName, ISTable& catKeyTable);
+    void GetSecondaryKeyAttributes(std::vector<std::pair<std::string, std::string> >& keyAttributes,
       const std::string& catTableName, ISTable& catKeyTable);
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
       const std::vector<std::string>& keyAttributes, ISTable& itemTable,
       ISTable* itemDefaultTableP, std::ostringstream& log);
+    void CheckSecondaryKeyItems(const std::string& blockName, ISTable& catTable,
+      const std::vector<std::pair<std::string, std::string> >& keyAttributes, ISTable& itemTable,
+      ISTable* itemDefaultTableP, std::ostringstream& log);
 
     void CheckMandatoryItems(const std::string& blockName, ISTable& catTable,
       ISTable& refItemTable, const std::vector<std::string>& keyItems,
+      std::ostringstream& log);
+    void CheckMandatoryItemsSecondaryKey(const std::string& blockName, ISTable& catTable,
+      ISTable& refItemTable, const std::vector<std::pair<std::string, std::string> >& keyItems,
       std::ostringstream& log);
 
     void CheckAndRectifyItemTypeCode(Block& block, std::ostringstream& log);
