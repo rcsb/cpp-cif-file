@@ -2480,7 +2480,7 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
         for (unsigned int rowI = 0; rowI < duplRows.size(); rowI++)
         {
             bool report = true;
-            //TEST TEST
+            //TEST TEST 
             for (int j = 0; j < keyItems.size(); ++j)
             {
                 std::cout << keyItemsVector[j] << endl;

@@ -555,7 +555,7 @@ class CifFile : public TableFile
 #ifdef VLAD_TO_CIF_FILE_NOT_USED
     void del_attribute_value_where(CifFile *fobj, const char *blockId,
       const char *category, const char *attributeB, const char *valB);
-#endif // VLAD_TO_CIF_FILE_NOT_USED not defined
+#endif // VLAD_TO_CIF_FILE_NOT_USED not defined 
 
     int CheckCategories(Block& block, Block& refBlock, std::ostringstream& log);
     void CheckCategoryKey(Block& block, std::ostringstream& log);
