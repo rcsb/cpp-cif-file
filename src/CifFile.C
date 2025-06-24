@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include <set>
 #include <algorithm>
+#include <map>
 
 #include "GenString.h"
 #include "RcsbFile.h"
@@ -1620,7 +1621,6 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
 
         CheckMandatoryItems(block.GetName(), *catTableP, *itemTableP,
           keyAttributes, log);
-        std::cout << "Checkpoint 1: key attributes checked" << endl;
 
         // if secondary key table exists, get key attributes for secondary key table
         if (catSecKeyTableP != NULL)
@@ -1630,9 +1630,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
             CheckSecondaryKeyItems(block.GetName(), *catTableP, secondaryKeyAttributes, *itemTableP,
                 itemDefaultTableP, log);
             std::cout << "Checkpoint 3: secondary key items checked" << endl;
-            CheckMandatoryItemsSecondaryKey(block.GetName(), *catTableP, *itemTableP,
-                secondaryKeyAttributes, log);
-            std::cout << "Checkpoint 4: secondary mandatory key items checked" << endl;
+            // determine if need to use CheckMandatoryItems. based on function, might not need it for secondary keys
         }
 
 #ifdef JW_DEBUG
@@ -2383,7 +2381,6 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
     bool keyNotFound1 = false;
     bool keyNotFound2 = false;
     vector<string> keyGroupVector;
-    vector<string> keyItemsVector;
 
     // determine if attributes are present in secondary_key_items table
     for (unsigned int k = 0; k < keyItems.size(); k++)
@@ -2393,6 +2390,29 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
         {
             // might need something else here
             keyNotFound1 = true;
+        }
+        else
+        {
+            if (keyGroupVector.size() == 0)
+            {
+                keyGroupVector.push_back(keyItems[k].first);
+            }
+            else
+            {
+                bool found = false;
+                for (unsigned int j = 0; j < keyGroupVector.size(); ++j)
+                {
+                    if (keyItems[k].first == keyGroupVector[j])
+                    {
+                        found = true;
+                        continue;
+                    }
+                }
+                if (!found)
+                {
+                    keyGroupVector.push_back(keyItems[k].first);
+                }
+            }
         }
         // check if item_name exists as a column in category_secondary_key table
         if (!catTable.IsColumnPresent(keyItems[k].second))
@@ -2436,93 +2456,108 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
     }
 
     // push non-missing key values to vector
-    // since key_id values are not column names, we have to append them to a different vector than the one for item_name values
+    std::map<string, vector<string> > keyItemsMap;
     if (!keyNotFound1 && !keyNotFound2)
     {
-        for (unsigned int i = 0; i < keyItems.size(); ++i)
+        for (unsigned int group = 0; group < keyGroupVector.size(); ++group)
         {
-            keyGroupVector.push_back(keyItems[i].first);
-            keyItemsVector.push_back(keyItems[i].second);
+            vector<string> keyItemsVectorTemp;
+            for (unsigned int i = 0; i < keyItems.size(); ++i)
+            {
+                bool duplicate = false;
+                if (keyItems[i].first == keyGroupVector[group])
+                {
+                    // push the item_name value to the vector
+                    if (keyItemsVectorTemp.size() == 0)
+                    {
+                        // if the vector is empty, push the first item_name value
+                        keyItemsVectorTemp.push_back(keyItems[i].second);
+                    }
+                    for (unsigned int j = 0; j < keyItemsVectorTemp.size(); ++j)
+                    {
+                        if (keyItems[i].second == keyItemsVectorTemp[j])
+                        {
+                            // if the item_name value is already in the vector, skip it
+                            duplicate = true;
+                            continue;
+                        }
+                    }
+                    if (!duplicate)
+                    {
+                        keyItemsVectorTemp.push_back(keyItems[i].second);
+                    }
+                    
+                }
+            }
+            keyItemsMap[keyGroupVector[group]] = keyItemsVectorTemp;
         }
     }
 
     // if any of the key_id values are not able to be found, do stuff
     if (keyNotFound1)
     {
-        //insert stuff here
+        //insert stuff here?
         return;
     }
 
     // if any of the item_name values are not able to be found, do stuff
     if (keyNotFound2)
     {
-        // insert stuff here
+        // insert stuff here?
         return;
     }
 
     // Check the values of secondary key items
     CheckSecondaryKeyValues(keyItems, *valCatTableP, log);
 
-    vector<pair<unsigned int, unsigned int> > duplRows;
-    
     // check for duplicate values in the category table
-    for (unsigned int i = 0; i < keyItemsVector.size(); ++i)
+    typedef std::map<string, vector<string> >::iterator keyItemsMapIter;
+
+    for(auto const &[outer_key, inner_vector] : keyItemsMap) 
     {
-        // TEST TEST
-        //std::cout << "key item: " << keyItemsVector[i] << endl;
-        //std::cout << "key group: " << keyGroupVector[i] << endl;
-        // TEST TEST
-    }
-    (*valCatTableP).FindDuplicateRowsSecondaryKey(duplRows, keyItemsVector, keyGroupVector, true);
-    if (!duplRows.empty())
-    {
-        //check to see if duplicates are actually copies.
-        for (unsigned int rowI = 0; rowI < duplRows.size(); rowI++)
+        vector<pair<unsigned int, unsigned int> > duplRows;
+        vector<string> keyItemsVector;
+        for (unsigned int i = 0; i < inner_vector.size(); ++i)
         {
-            bool report = true;
-            //TEST TEST 
-            for (int j = 0; j < keyItems.size(); ++j)
+            keyItemsVector.push_back(inner_vector[i]);
+        }
+
+        (*valCatTableP).FindDuplicateRows(duplRows, keyItemsVector, true);
+        if (!duplRows.empty())
+        {
+            //check to see if duplicates are actually copies.
+            for (unsigned int rowI = 0; rowI < duplRows.size(); rowI++)
             {
-                std::cout << keyItemsVector[j] << endl;
-            }
-            //TEST TEST
+                bool report = true;
 
-            for (unsigned int keyI = 0; keyI < keyItemsVector.size(); ++keyI)
-            {
-                // TEST TEST
-                std::cout << "dupl " << rowI << ": " << duplRows[rowI].first <<endl;
-                // TEST TEST
-
-                const string& cell = (*valCatTableP)(duplRows[rowI].first,
-                keyItemsVector[keyI]);
-
-                // TEST TEST
-                 std::cout << "cell value in row   " << rowI << ": " << cell <<endl;
-                 // TEST TEST
-                
-                if (CifString::IsEmptyValue(cell))
+                for (unsigned int keyI = 0; keyI < keyItemsVector.size(); ++keyI)
                 {
-                    report = false;
-                    break;
-                    
-                }
-            }
-
-            if (!report)
-                continue;
-
-            log << "ERROR - In block \"" << blockName << "\", in " <<
-            "cateogory \"" << (*valCatTableP).GetName() <<
-            "\", values for key item(s):" << endl;
-
-            for (unsigned int keyI = 0; keyI < keyItemsVector.size(); ++keyI)
-            {
-                log << "  \"" << keyItemsVector[keyI] << "\"," << endl; 
-            }
-
-            log << "  in row #" << duplRows[rowI].first + 1 <<
-            " are repeated in row #" << duplRows[rowI].second + 1 << endl;
+                    const string& cell = (*valCatTableP)(duplRows[rowI].first,
+                    keyItemsVector[keyI]);
                 
+                    if (CifString::IsEmptyValue(cell))
+                    {
+                        report = false;
+                        break;
+                    }
+                }
+
+                if (!report)
+                    continue;
+
+                log << "ERROR - In block \"" << blockName << "\", in " <<
+                "cateogory \"" << (*valCatTableP).GetName() <<
+                "\", values for key item(s):" << endl;
+
+                for (unsigned int keyI = 0; keyI < keyItemsVector.size(); ++keyI)
+                {
+                    log << "  \"" << keyItemsVector[keyI] << "\"," << endl; 
+                }
+
+                log << "  in row #" << duplRows[rowI].first + 1 <<
+                " are repeated in row #" << duplRows[rowI].second + 1 << endl;
+                
+            }
         }
     }
 }
@@ -2634,114 +2669,6 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
 
 }
 
-void CifFile::CheckMandatoryItemsSecondaryKey(const string& blockName, ISTable& catTable,
-  ISTable& refItemTable, const vector<pair<string, string> >& keyItems, ostringstream& log)
-{
-
-    /*
-    ** For a category, method looks into dictionary ("item" table)
-    ** to find out what its mandatory items are. Then it checks for existence
-    ** of those items in the category.
-    */
-   vector<string> allItems; //needs to be vector for later functions. look into
-   for (unsigned int i = 0; i < keyItems.size(); ++i)
-   {
-        allItems.push_back(keyItems[i].first);
-        allItems.push_back(keyItems[i].second);
-   }
-
-    vector<string> refItemList;
-    refItemList.push_back("category_id");
-    refItemList.push_back("mandatory_code");
-
-    vector<string> refItemTarget;
-    refItemTarget.push_back(catTable.GetName());
-    refItemTarget.push_back("yes");
-
-    vector<unsigned int> OutList;
-    refItemTable.Search(OutList, refItemTarget, refItemList);
-    if (OutList.empty())
-    {
-        refItemTarget[1] = "implicit";
- 
-        refItemTable.Search(OutList, refItemTarget, refItemList);
-        if (OutList.empty())
-        {
-            refItemTarget[1] = "implicit-ordinal";
- 
-            refItemTable.Search(OutList, refItemTarget, refItemList);
-            if (OutList.empty())
-            {
-                refItemTarget[1] = "conditional";
- 
-                refItemTable.Search(OutList, refItemTarget, refItemList);
-                if (OutList.empty())
-                {
-                    log << "ERROR - In block \"" << blockName <<
-                    "\", no mandatory items found in category \"" <<
-                    catTable.GetName() << "\"" << endl;
-                }
-            }
-
-        }
-    }
-
-    for (unsigned int k = 0; k < OutList.size(); ++k)//might need to modify to include both key_id and item_name for secondary key
-    {
-        string cell = refItemTable(OutList[k], "name");
-        std::cout << "cell: " << cell << endl;
-        //string cell2 = refItemTable(OutList[k], "item_name");
-        string itemName;
-        string itemName2;
-        CifString::GetItemFromCifItem(itemName, cell);
-        std::cout << "itemName: " << itemName << endl;
-
-        // Values for mandatory items must not be unknown. inapplicable is fine.
-        for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
-        {
-            if (catTable(rowI, itemName) == CifString::UnknownValue)
-            {
-#ifdef VLAD_OLD
-                log << "ERROR - In block \"" << blockName <<
-                  "\", item \"" << cell <<
-                  "\", mandatory item has invalid value \"" <<
-                  catTable(rowI, itemName) << "\" in row# " << rowI << endl;
-#endif
-                log << "ERROR - In block \"" << blockName <<
-                  "\", mandatory item \"" << cell <<
-                  "\" has invalid value \"" << catTable(rowI, itemName) <<
-                  "\"";
-
-                bool first = true;
-                for (unsigned int i = 0; i < allItems.size(); ++i)
-                {
-                    if (!catTable.IsColumnPresent(allItems[i]))
-                    {
-                        continue;
-                    }
-
-                    if (allItems[i] != itemName)
-                    {
-                        if (first)
-                            log << " in row: ";
-                        else
-                            log << ", ";
-
-                        string cifItem;
-                        CifString::MakeCifItem(cifItem, catTable.GetName(),
-                          allItems[i]);
-                        log << "\"" << cifItem <<
-                          "\" == \"" << catTable(rowI, allItems[i]) <<
-                          "\"";
-                        first = false;
-                    }
-                }
-                log << endl;
-            }
-        }
-    }
-
-}
 
 
 int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,
