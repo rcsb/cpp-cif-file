@@ -297,10 +297,11 @@ void CifFile::WriteNmrStar(const string& nmrStarFileName,
 
 int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
   const bool extraDictChecks, const bool extraCifChecks,
-  const std::vector<std::string>& skipBlockNames)
+  const std::vector<std::string>& skipBlockNames, const bool secKeyChecks)
 {
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
+    _secKeyChecks = secKeyChecks;
 
     int ret = 0;
 
@@ -335,7 +336,7 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
         ostringstream buf;
 
         ret = DataChecking(block, refBlock, buf, extraDictChecks,
-          extraCifChecks);
+          extraCifChecks, secKeyChecks); // add something for secKeyChecks
 
         string sBuf = buf.str();
 
@@ -360,21 +361,29 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
 
 int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
-  const bool extraDictChecks, const bool extraCifChecks)
+  const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks) // add something for secKeyChecks
 {
 
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
+    _secKeyChecks = secKeyChecks;
 
     int ret1, ret2;
 
     ret1 = CheckCategories(block, refBlock, buf);
     CheckCategoryKey(block, buf);
-    std::cout << "Checking sec. keys..." << std::endl;
-    CheckCategorySecondaryKey(block, buf);
-    std::cout << "Finished checking sec. keys." << std::endl;
+    if (secKeyChecks)
+    {
+        std::cout << "Checking sec. keys..." << std::endl;
+        CheckCategorySecondaryKey(block, buf);
+        std::cout << "Finished checking sec. keys." << std::endl;
+    }
+    else
+    {
+        //std::cout << "Skipping sec. keys checking." << std::endl;
+    }
     CheckItemsTable(block, buf);
-    ret2 = CheckItems(block, refBlock, buf);
+    ret2 = CheckItems(block, refBlock, secKeyChecks, buf);
 
     CheckAndRectifyItemTypeCode(block, buf);
 
@@ -1378,28 +1387,28 @@ void CifFile::CheckCategoryKey(Block& block, ostringstream& log)
 void CifFile::CheckCategorySecondaryKey(Block& block, ostringstream& log)
 {
 
-    ISTable* catKeyTableP = block.GetTablePtr("category_secondary_key");
+    ISTable* catSecKeyTableP = block.GetTablePtr("category_secondary_key");
 
     ISTable* itemTableP = block.GetTablePtr("item"); 
 
-    // if there is no "category_secondary_key" table, there is nothing to check.
-    if ((catKeyTableP == NULL) || (itemTableP == NULL))
+    // if there is no "category_secondary_key" or "item" table, there is nothing to check.
+    if ((catSecKeyTableP == NULL) || (itemTableP == NULL))
         return;
 
     vector<string> searchCols;
     searchCols.push_back("name");
 
     // For every item in the category key table, validate key_id and item_name
-    for (unsigned int itemI = 0; itemI < catKeyTableP->GetNumRows(); ++itemI)
+    for (unsigned int itemI = 0; itemI < catSecKeyTableP->GetNumRows(); ++itemI)
     {
-        const string& cifItemId = (*catKeyTableP)(itemI, "key_id");
-        const string& cifItemName = (*catKeyTableP)(itemI, "item_name");
+        const string& cifItemId = (*catSecKeyTableP)(itemI, "key_id");
+        const string& cifItemName = (*catSecKeyTableP)(itemI, "item_name");
         
         if (CifString::IsEmptyValue(cifItemId))
         {
             log << "ERROR - In block \"" << block.GetName() <<
               "\", for \"_category_secondary_key.id\" == \"" << 
-              (*catKeyTableP)(itemI, "id") << "\", invalid value " <<
+              (*catSecKeyTableP)(itemI, "id") << "\", invalid value " <<
               "\"_category_secondary_key.key_id\" == \"" << cifItemId << "\"" << endl;
 
             continue;
@@ -1409,13 +1418,13 @@ void CifFile::CheckCategorySecondaryKey(Block& block, ostringstream& log)
         {
             log << "ERROR - In block \"" << block.GetName() <<
               "\", for \"_category_secondary_key.id\" == \"" << 
-              (*catKeyTableP)(itemI, "id") << "\", invalid value " <<
+              (*catSecKeyTableP)(itemI, "id") << "\", invalid value " <<
               "\"_category_secondary_key.item_name\" == \"" << cifItemName << "\"" << endl;
 
             continue;
         }
 
-        // for each item_name in secondary keys, determine if it is defined in the item table
+        // for each item_name value in secondary keys, determine if it is defined in the item table
         vector<string> targets;
         targets.push_back(cifItemName);
 
@@ -1479,7 +1488,7 @@ void CifFile::CheckItemsTable(Block& block, ostringstream& log)
 }
 
 
-int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
+int CifFile::CheckItems(Block& block, Block& refBlock, const bool secKeyChecks, ostringstream& log)
 {
     int ret = 1;
  
@@ -1618,12 +1627,16 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log)
         CheckMandatoryItems(block.GetName(), *catTableP, *itemTableP,
           keyAttributes, log);
 
-        // if secondary key table exists, get key attributes for secondary key table
-        if (catSecKeyTableP != NULL)
+        // if secondary key table exists and secondary key checks are not disabled, get key attributes for secondary key table
+        if (secKeyChecks && (catSecKeyTableP != NULL))
         {
             GetSecondaryKeyAttributes(secondaryKeyAttributes, catTableP->GetName(), *catSecKeyTableP);
 
             CheckSecondaryKeyItems(block.GetName(), *catTableP, secondaryKeyAttributes, *itemTableP, log);
+        }
+        if(!secKeyChecks)
+        {
+            //std::cout << "secKeyChecks is disabled, skipping secondary key checks." << std::endl;
         }
 
 #ifdef JW_DEBUG
@@ -2206,7 +2219,7 @@ void CifFile::GetKeyAttributes(vector<string>& keyAttributes,
 }
 
 void CifFile::GetSecondaryKeyAttributes(vector<pair<string, string> >& keyAttributes,
-  const string& catTableName, ISTable& catKeyTable)
+  const string& catTableName, ISTable& catSecKeyTable)
 {
     /*
     ** For a category, method looks into dictionary ("category_secondary_key" table)
@@ -2226,7 +2239,7 @@ void CifFile::GetSecondaryKeyAttributes(vector<pair<string, string> >& keyAttrib
     //TEST TEST
 
     vector<unsigned int> OutList; 
-    catKeyTable.Search(OutList, keyTarget, keyList);
+    catSecKeyTable.Search(OutList, keyTarget, keyList);
 
     // for each row in the secondary key table, make a pair containing key_id and item_name 
     for (unsigned int i = 0; i < OutList.size(); ++i)
@@ -2234,10 +2247,10 @@ void CifFile::GetSecondaryKeyAttributes(vector<pair<string, string> >& keyAttrib
         string keyAttributeName;
         string keyAttributeKeyID;
 
-        keyAttributeKeyID = catKeyTable(OutList[i], "key_id");
+        keyAttributeKeyID = catSecKeyTable(OutList[i], "key_id");
 
         CifString::GetItemFromCifItem(keyAttributeName,
-        catKeyTable(OutList[i], "item_name"));
+        catSecKeyTable(OutList[i], "item_name"));
 
         keyAttributes.push_back(std::make_pair(keyAttributeKeyID,keyAttributeName));
     }
@@ -2469,6 +2482,7 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
     }
 
     // check for duplicate values in the secondary key table by iterating through map of secondary keys
+    // duplicate rows are determined by seeing if the values for all item_names for a given key_id are the same
     std::map<string, vector<string> >::iterator keyItemsMapIter;
 
     for(keyItemsMapIter = keyItemsMap.begin(); keyItemsMapIter != keyItemsMap.end(); keyItemsMapIter++)
@@ -2563,11 +2577,6 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
               "\"" << endl;
             continue;
         }
-        // insert search for dependent items if conditionally mandatory
-        // 1: does item_conditional_mandatory table exist?
-        // 2: does the item being tested have item_conditional_mandatory attributes?
-        // 3: does the target_item_name attribute exist in the item table?
-        // if one of these conditions are not met, produce error
 
         // Values for mandatory items must not be null.
         for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
@@ -3420,7 +3429,7 @@ void CifFile::CheckSecondaryKeyValues(vector<string>& missingValues, const vecto
 
             if (value == CifString::InapplicableValue)
             {
-                // change to unknown value
+                // record which attributes are inapplicable, push to vector
                 missingValues.push_back(keysAttribs[keyI]);
             }
         }
@@ -3434,6 +3443,7 @@ void CifFile::FixInapplicableValues(ISTable& catTable,
     {
         for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
         {
+            // convert inapplicable values to unknown values
             const string& value = catTable(rowI, itemNames[keyInd]);
             if (value == CifString::InapplicableValue)
             {

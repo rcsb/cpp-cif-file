@@ -411,8 +411,11 @@ class CifFile : public TableFile
     **    those checks are not performed.
     **  \param[in] skipBlockNames - optional parameter that if set, indicates a
     **    set of blocks to skip.
+    **  \param[in] secKeyChecks - optional parameter that indicates whether
+    **    to disable checks for secondary keys. If not specified,
+    **    checks for secondary keys are performed.
     **
-    **  \return 0 - if all checks passed
+    **  \return 0 - if all checks passed;
     **  \return different than 0 - if checks failed
     **
     **  \pre None
@@ -423,7 +426,7 @@ class CifFile : public TableFile
     */
     int DataChecking(CifFile& dicRef, const std::string& diagFileName,
       const bool extraDictChecks = false, const bool extraCifChecks = false,
-      const std::vector<std::string>& skipBlockNames = std::vector<std::string>());
+      const std::vector<std::string>& skipBlockNames = std::vector<std::string>(), const bool secKeyChecks = true);
 
     /**
     **  Checks a block of CIF file against the specified reference block.
@@ -438,8 +441,11 @@ class CifFile : public TableFile
     **  \param[in] extraCifChecks - optional parameter that indicates whether
     **    to perform additional, non-standard, CIF checks. If not specified,
     **    those checks are not performed.
+    **  \param[in] secKeyChecks - optional parameter that indicates whether
+    **    to disable checks for secondary keys. If not specified,
+    **    checks for secondary keys are performed.
     **
-    **  \return 0 - if all checks passed
+    **  \return 0 - if all checks passed;
     **  \return different than 0 - if checks failed
     **
     **  \pre None
@@ -449,7 +455,7 @@ class CifFile : public TableFile
     **  \exception: None
     */
     int DataChecking(Block& block, Block& refBlock, std::ostringstream& buf,
-      const bool extraDictChecks = false, const bool extraCifChecks = false);
+      const bool extraDictChecks = false, const bool extraCifChecks = false, const bool secKeyChecks = true);
 
     /**
     **  Sets enumerations checking option for case-insensitive types.
@@ -518,36 +524,131 @@ class CifFile : public TableFile
     */
     void FindCifNullRows(std::vector<unsigned int>& nullRowsIndices,
       const ISTable& isTable);
-
+    /**
+     **
+     **
+     **  \param[out] attribVal - a reference to a string that will hold the attribute values
+     **  \param[in] blockId - the ID of the block from which to retrieve the attribute value
+     **  \param[in] category - the category from which to retrieve the attribute value
+     **  \param[in] attribute - the name of the attribute whose value is to be retrieved
+     ** 
+     **  \return None
+     **
+     */
     void GetAttributeValue(std::string& attribVal, const std::string& blockId,
       const std::string& category, const std::string& attribute);
+    /**
+     * 
+     * 
+     **  \param[out] attribVal - a reference to a string that will hold the attribute value
+     **  \param[in] blockId - the ID of the block from which to retrieve the attribute value
+     **  \param[in] category - the category from which to retrieve the attribute value
+     **  \param[in] attributeA - the name of the first attribute to check
+     **  \param[in] attributeB - the name of the second attribute to check
+     **  \param[in] valB - the value of the second attribute to check against
+     * 
+     **  \return None 
+     */
     void GetAttributeValueIf(std::string& attribVal, const std::string& blockId,
       const std::string& category, const std::string& attributeA,
       const std::string& attributeB, const std::string& valB);
+    /**
+     * 
+     * 
+     ** \param[in] blockId - the ID of the block to check
+     ** \param[in] category - the category to check
+     ** \param[in] attribute - the name of the attribute to check
+     ** 
+     ** \return true if the attribute value is defined and not empty, false otherwise
+     * 
+     */
     bool IsAttributeValueDefined(const std::string& blockId,
       const std::string& category, const std::string& attribute);
-
+    /**
+     * 
+     * 
+     ** \param[in] blockId - the ID of the block to which the attribute value is to be set
+     ** \param[in] category - the category to which the attribute belongs
+     ** \param[in] attribute - the name of the attribute to set
+     ** \param[in] value - the value to set for the attribute
+     ** \param[in] create - if true, the category will be created if it does not exist
+     ** 
+     ** \return None
+     */
     void SetAttributeValue(const std::string& blockId,
       const std::string& category,
       const std::string& attribute, const std::string& value,
       const bool create = false);
+    /**
+     * 
+     * 
+     ** \param[in] blockId - the ID of the block to which the attribute value is to be set
+     ** \param[in] category - the category to which the attribute belongs
+     ** \param[in] attributeA - the name of the first attribute to check
+     ** \param[in] valA - the value of the first attribute to check against
+     ** \param[in] attributeB - the name of the second attribute to check
+     ** \param[in] valB - the value of the second attribute to check against
+     ** \param[in] create - if true, the category will be created if it does not exist
+     ** 
+     ** \return None
+     */
     void SetAttributeValueIf(const std::string& blockId,
       const std::string& category, const std::string& attributeA,
       const std::string& valA,
       const std::string& attributeB, const std::string& valB,
        const bool create = false);
+    /**
+     * 
+     * 
+     ** \param[in] blockId - the ID of the block to which the attribute value is to be set
+     ** \param[in] category - the category to which the attribute belongs
+     ** \param[in] attribute - the name of the attribute to set
+     ** \param[in] value - the value to set for the attribute if it is currently null
+     **  
+     ** \return None
+     */
     void SetAttributeValueIfNull(const std::string& blockId,
       const std::string& category, const std::string& attribute,
       const std::string& value);
-
+    /**
+     *
+     * 
+     ** \param[out] strings - a vector of strings that will hold the attribute values
+     ** \param[in] blockId - the ID of the block from which to retrieve the attribute values
+     ** \param[in] category - the category from which to retrieve the attribute values
+     ** \param[in] attribute - the name of the attribute whose values are to be retrieved
+     ** 
+     ** \return None 
+     */
     void GetAttributeValues(std::vector<std::string>& strings,
       const std::string& blockId,
       const std::string& category, const std::string& attribute);
+    /**
+     *
+     * 
+     ** \param[out] strings - a vector of strings that will hold the attribute values
+     ** \param[in] blockId - the ID of the block from which to retrieve the attribute values
+     ** \param[in] category - the category from which to retrieve the attribute values
+     ** \param[in] attributeA - the name of the first attribute to check
+     ** \param[in] attributeB - the name of the second attribute to check
+     ** \param[in] valB - the value of the second attribute to check against
+     **
+     ** \return None
+     */
     void GetAttributeValuesIf(std::vector<std::string>& strings,
       const std::string& blockId, const std::string& category,
       const std::string& attributeA,
       const std::string& attributeB, const std::string& valB);
-
+    /**
+     *
+     * 
+     ** \param[in] blockId - the ID of the block to which the attribute values are to be set
+     ** \param[in] category - the category to which the attribute belongs
+     ** \param[in] attribute - the name of the attribute to set
+     ** \param[in] values - a vector of strings containing the values to set for the attribute
+     *
+     ** \return None
+     */
     void SetAttributeValues(const std::string& blockId,
       const std::string& category, const std::string& attribute,
       const std::vector<std::string>& values);
@@ -557,11 +658,55 @@ class CifFile : public TableFile
       const char *category, const char *attributeB, const char *valB);
 #endif // VLAD_TO_CIF_FILE_NOT_USED not defined 
 
+    /**
+     *
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[in] refBlock - reference to a reference block against which
+     ** \param[out] log - reference to the output stream (LEE NOTE TO LEE FIX WORDING. how to describe?)
+     **
+     ** \return 0 - if all checks passed;
+     ** \return different than 0 - if checks failed
+     */
     int CheckCategories(Block& block, Block& refBlock, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[out] log - reference to the output stream
+     *
+     ** \return None
+     */
     void CheckCategoryKey(Block& block, std::ostringstream& log);
+    /**
+     *
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None 
+     */
     void CheckCategorySecondaryKey(Block& block, std::ostringstream& log);
+    /**
+     *
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None 
+     */
     void CheckItemsTable(Block& block, std::ostringstream& log);
-    int CheckItems(Block& block, Block& refBlock, std::ostringstream& log);
+    /**
+     *
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[in] refBlock - reference to a reference block against which
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return 0 - if all checks passed;
+     ** \return different than 0 - if checks failed 
+     */
+    int CheckItems(Block& block, Block& refBlock, const bool secKeyChecks, std::ostringstream& log);
 
 
   protected:
@@ -624,88 +769,328 @@ class CifFile : public TableFile
 
     bool _extraDictChecks;
     bool _extraCifChecks;
+    bool _secKeyChecks;
 
     void Init();
 
+    /**
+     ** For a category, method looks into dictionary ("category" table)
+     ** to find out whether it exists or not.
+     ** 
+     ** \param[in] catName - name of the category to check
+     ** \param[in] catTable - reference to the category table
+     ** 
+     ** \return true - if the category is defined in the dictionary;
+     ** \return false - if the category is not defined in the dictionary
+     */
     bool IsCatDefinedInRef(const std::string& catName, ISTable& catTable);
+    /**
+     ** For an item, method looks into dictionary ("item" table)
+     ** to find out whether the item is defined in the category or not. 
+     ** 
+     ** \param[in] catName - name of the category to check
+     ** \param[in] itemName - name of the item to check
+     ** \param[in] refItemTable - reference to the item table
+     ** 
+     ** \return true - if the item is defined in the category;
+     ** \return false - if the item is not defined in the category
+     */
     bool IsItemDefinedInRef(const std::string& catName,
       const std::string& itemName, ISTable& refItemTable);
+    /**
+     * 
+     * 
+     ** \param[in] catName - name of the category to check
+     ** \param[in] attribName - name of the attribute to check
+     ** \param[in] itemTable - reference to the item table
+     ** 
+     ** \return true - if the attribute is defined in the item table;
+     ** \return false - if the attribute is not defined in the item table
+     */
     bool IsImplicitNatureKey(const string& catName, const string& attribName,
       ISTable& itemTable);
+    /**
+     ** Return vector of keys (as CIF items) having implicit nature for which
+     ** some of values in the category table are unknown
+     **
+     ** \param[out] implKeyItems - vector of implicit nature keys
+     ** \param[in] catName - name of the category to check
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] refItemTable - reference to the item table
+     ** 
+     ** \return None
+     */
     void GetImplNatureKeysWithMissingValues(vector<string>& implKeyItems,
       const string& catName, ISTable& catTable, ISTable& refItemTable);
+    /**
+     * 
+     * 
+     ** \param[out] implNatureKeys - vector of implicit keys
+     ** \param[in] catName - name of the category to check
+     ** \param[in] refItemTable - reference to the item table
+     ** 
+     ** \return None
+     */
     void GetImplNatureKeys(vector<string>& implNatureKeys,
       const string& catName, ISTable& refItemTable);
+    /**
+     * 
+     * 
+     ** \param[in] table - reference to the table to check
+     ** \param[in] colName - name of the column to check
+     ** 
+     ** \return true - if some values in the column are empty or if column is not present;
+     ** \return false - if all values in the column are defined
+     */
     bool AreSomeValuesInColumnEmpty(ISTable& table, const string& colName);
+    /**
+     * 
+     * 
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] implNatureKeys - vector of implicit keys
+     ** \param[in] refItemDefaultTable - reference to the item default table
+     ** \param[out] log - reference to output stream
+     ** 
+     ** \return None
+     */
     void FixMissingValuesOfImplNatureKeys(ISTable& catTable,
       const vector<string>& implNatureKeys, ISTable& refItemDefaultTable,
       std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[out] defValue - string that holds the default value
+     ** \param[in] implNatKey - name of implicit key
+     ** \param[in] refItemDefaultTable - reference to the item default table
+     **
+     ** \return None
+     */
     void GetItemDefaultValue(string& defValue, const string& implNatKey,
       ISTable& refItemDefaultTable);
+    /**
+     ** For a category, method checks for existence of key
+     ** items and checks if there are duplicate key values.
+     **
+     ** \param[in] blockName - name of the block to which the category belongs
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] keyTable - reference to the table that holds key items
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
       ISTable& keyTable, std::ostringstream& log);
+    /**
+     ** For a category, method checks for existence of key
+     ** items and checks if there are duplicate key values.
+     ** 
+     ** \param[in] keyItems - vector of key items to check
+     ** \param[in] catTable - reference to the category table
+     ** \param[out] log - reference to the output stream
+     **
+     ** \return None
+     */
     void CheckKeyValues(const std::vector<std::string>& keyItems,
       ISTable& catTable, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[out] missingValues - vector of missing key values
+     ** \param[in] keyItems - vector of key item_name values to check
+     ** \param[in] catTable - reference to the category table
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckSecondaryKeyValues(std::vector<std::string>& missingValues, const std::vector<std::string>& keyItems,
       ISTable& catTable, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] itemNames - vector of item names to convert to unknown values
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void FixInapplicableValues(ISTable& catTable,
       const std::vector<std::string>& itemNames, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[out] keyAttributes - vector of key attributes
+     ** \param[in] catTableName - name of the category table
+     ** \param[in] catKeyTable - reference to the category key table
+     ** 
+     ** \return None
+     */
     void GetKeyAttributes(std::vector<std::string>& keyAttributes,
       const std::string& catTableName, ISTable& catKeyTable);
+    /**
+     * 
+     * 
+     ** \param[out] keyAttributes - vector of key attribute pairs
+     ** \param[in] catTableName - name of the category table
+     ** \param[in] catKeyTable - reference to the category key table
+     ** 
+     ** \return None
+     */
     void GetSecondaryKeyAttributes(std::vector<std::pair<std::string, std::string> >& keyAttributes,
       const std::string& catTableName, ISTable& catKeyTable);
+    /**
+     ** For a category, method checks for existence of key
+     ** items and checks if there are duplicate key values.
+     ** 
+     ** \param[in] blockName - name of the block to which the category belongs
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] keyAttributes - vector of key attributes
+     ** \param[in] itemTable - reference to the item table
+     ** \param[in] itemDefaultTableP - pointer to the item default table, if it exists
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckKeyItems(const std::string& blockName, ISTable& catTable,
       const std::vector<std::string>& keyAttributes, ISTable& itemTable,
       ISTable* itemDefaultTableP, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[in] blockName - name of the block to which the category belongs
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] keyAttributes - vector of key attributes
+     ** \param[in] itemTable - reference to the item table
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckSecondaryKeyItems(const std::string& blockName, ISTable& catTable,
       const std::vector<std::pair<std::string, std::string> >& keyAttributes, ISTable& itemTable,
       std::ostringstream& log);
 
+    /**
+     * 
+     * 
+     ** \param[in] blockName - name of the block to which the category belongs
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] refItemTable - reference to the item table
+     ** \param[in] keyItems - vector of key items to check
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckMandatoryItems(const std::string& blockName, ISTable& catTable,
       ISTable& refItemTable, const std::vector<std::string>& keyItems,
       std::ostringstream& log);
-    void CheckMandatoryItemsSecondaryKey(const std::string& blockName, ISTable& catTable,
-      ISTable& refItemTable, const std::vector<std::pair<std::string, std::string> >& keyItems,
-      std::ostringstream& log);
 
+    /**
+     * 
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return None
+     */
     void CheckAndRectifyItemTypeCode(Block& block, std::ostringstream& log);
+    /**
+     * 
+     * 
+     ** \param[out] retItemTypeCode - reference to a string that will hold the
+     ** item type code
+     ** \param[out] log - reference to the output stream
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[in] cifParentChild - reference to a CifParentChild object
+     ** \param[in] cifItemName - name of the CIF item
+     ** 
+     ** \return None
+     */
     void RectifyItemTypeCode(std::string& retItemTypeCode,
       std::ostringstream& log, Block& block, CifParentChild& cifParentChild,
       const std::string& cifItemName);
-
+    /**
+     * 
+     * 
+     ** \param[in] block - reference to a block that is to be checked
+     ** \param[in] catTable - reference to the category table
+     ** \param[in] attribName - name of the attribute to check
+     ** \param[in] itemTypeTable - reference to the item type table
+     ** \param[in] itemTypeListTable - reference to the item type list table
+     ** \param[in] itemRangeTableP - pointer to the item range table, if it exists
+     ** \param[in] itemEnumTableP - pointer to the item enum table, if it exists
+     ** \param[in] parChildTable - reference to the parent-child table
+     ** \param[in] itemAliasesP - pointer to the item aliases table, if it exists
+     ** \param[out] log - reference to the output stream
+     ** 
+     ** \return 0 - if all checks passed;
+     ** \return different than 0 - if checks failed
+     */
     int CheckRegExpRangeEnum(Block& block, ISTable& catTable,
       const std::string& attribName, ISTable& itemTypeTable,
       ISTable& itemTypeListTable, ISTable* itemRangeTableP,
       ISTable* itemEnumTableP, ISTable& parChildTable, ISTable* itemAliasesP,
       std::ostringstream& log);
-
+    /**
+     * 
+     * 
+     ** \param[in] cell - the cell value to check
+     ** \param[in] typeCode - the type code of the cell
+     ** \param[in] minlist - vector of minimum values for the range check
+     ** \param[in] maxlist - vector of maximum values for the range check
+     ** 
+     ** \return 0 - if the cell value is within the range;
+     ** \return different than 0 - if the cell value is out of range
+     */
     int CheckCellRange(const std::string& cell, const std::string& typeCode,
       const std::vector<std::string>& minlist,
       const std::vector<std::string>& maxlist);
-
+    /**
+     * 
+     * 
+     ** \param[in] cell - the cell value to check
+     ** \param[in] typeCode - the type code of the cell
+     ** \param[in] primCode - the primary code of the cell
+     ** \param[in] enumlist - vector of enumeration values for the enum check
+     ** 
+     ** \return 0 - if the cell value is in the enumeration list;
+     ** \return different than 0 - if the cell value is not in the enumeration list
+     */
     int CheckCellEnum(const std::string& cell, const std::string& typeCode,
       const std::string& primCode, const std::vector<std::string>& enumlist);
-
+    /**
+     * 
+     */
     int CheckCellFloatRange(const std::string& cell,
       const std::vector<std::string>& minlist,
       const std::vector<std::string>& maxlist);
-
+    /**
+     * 
+     */
     int CheckCellIntRange(const std::string& cell,
       const std::vector<std::string>& minlist,
       const std::vector<std::string>& maxlist);
-
+    /**
+     * 
+     */
     int CheckCellFloatEnum(const std::string& cell,
       const std::vector<std::string>& enumlist);
-
+    /**
+     * 
+     */
     int CheckCellIntEnum(const std::string& cell,
       const std::vector<std::string>& enumlist);
-
+    /**
+     * 
+     */
     int CheckCellOtherEnum(const std::string& cell, const std::string& primCode,
       const std::vector<std::string>& enumlist);
-
+    /**
+     * 
+     */
     void GetItemTypeCode(std::string& typeCode, const std::string& cifItemName,
       ISTable& itemTypeTable);
-
+    /**
+     * 
+     */
     void ConvertEscapedString(const std::string& inString,
       std::string& outString);
 };
