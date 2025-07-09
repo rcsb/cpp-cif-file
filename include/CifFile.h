@@ -30,6 +30,7 @@
 #include "CifString.h"
 #include "TableFile.h"
 #include "CifParentChild.h"
+#include "CifConditionalContext.h"
 
 
 /**
@@ -48,6 +49,9 @@ class CifFile : public TableFile
   public:
     std::string _parsingDiags;
     std::string _checkingDiags;
+    CifConditionalContext* _cctx;
+
+    CifConditionalContext* GetCondContext(CifConditionalContext* cctx, Block& inBlock, Block& refBlock);
 
     static const unsigned int STD_CIF_LINE_LENGTH = 80;
 
@@ -706,7 +710,13 @@ class CifFile : public TableFile
      ** \return 0 - if all checks passed;
      ** \return different than 0 - if checks failed 
      */
-    int CheckItems(Block& block, Block& refBlock, const bool secKeyChecks, std::ostringstream& log);
+    int CheckItems(Block& block, Block& refBlock, std::ostringstream& log, const bool secKeyChecks = true);
+    
+    void CheckConditionalCategories(Block& inBlock, ISTable& refCatTable,
+      CifConditionalContext& cctx, std::ostringstream& log);
+
+    void CheckConditionalItems(const std::string& blockName, ISTable& refCatTable,
+      ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log);
 
 
   protected:

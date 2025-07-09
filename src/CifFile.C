@@ -25,6 +25,7 @@
 #include "regex.h"
 #include "CifParentChild.h"
 #include "CifFile.h"
+#include "CifConditionalContext.h"
 
 
 using std::exception;
@@ -326,17 +327,19 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
     {
         Block& block = GetBlock(BlockNames[blockI]);
 
-	if (skipBlockNames.size() > 0) {
-	  std::string bName = block.GetName();
-	  if (std::find(skipBlockNames.begin(), skipBlockNames.end(), bName) != skipBlockNames.end()) {
-	      continue;
-	  }
-	}
+	    if (skipBlockNames.size() > 0) 
+        {
+	        std::string bName = block.GetName();
+	        if (std::find(skipBlockNames.begin(), skipBlockNames.end(), bName) != skipBlockNames.end()) 
+            {
+	            continue;
+	        }
+	    }
 	
         ostringstream buf;
 
         ret = DataChecking(block, refBlock, buf, extraDictChecks,
-          extraCifChecks, secKeyChecks); // add something for secKeyChecks
+          extraCifChecks, secKeyChecks);
 
         string sBuf = buf.str();
 
@@ -361,7 +364,7 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
 
 int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
-  const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks) // add something for secKeyChecks
+  const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks)
 {
 
     _extraDictChecks = extraDictChecks;
@@ -383,7 +386,7 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
         //std::cout << "Skipping sec. keys checking." << std::endl;
     }
     CheckItemsTable(block, buf);
-    ret2 = CheckItems(block, refBlock, secKeyChecks, buf);
+    ret2 = CheckItems(block, refBlock, buf, secKeyChecks);
 
     CheckAndRectifyItemTypeCode(block, buf);
 
@@ -1295,6 +1298,8 @@ int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
     int ret = 1;
 
     ISTable* refCatTableP = refBlock.GetTablePtr("category");
+    Block* refBlockP = &refBlock;
+    CifConditionalContext cctx = CifConditionalContext(block, refBlockP);
 
     vector<string> list;
     list.push_back("mandatory_code");
@@ -1488,7 +1493,7 @@ void CifFile::CheckItemsTable(Block& block, ostringstream& log)
 }
 
 
-int CifFile::CheckItems(Block& block, Block& refBlock, const bool secKeyChecks, ostringstream& log)
+int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const bool secKeyChecks)
 {
     int ret = 1;
  
@@ -1515,6 +1520,8 @@ int CifFile::CheckItems(Block& block, Block& refBlock, const bool secKeyChecks, 
     ISTable* itemTypeTableP = NULL;
     ISTable* itemRangeTableP = NULL;
     ISTable* itemEnumTableP = NULL;
+    Block* refBlockP = &refBlock;
+    CifConditionalContext cctx = CifConditionalContext(block, refBlockP);
 
     if (_extraCifChecks)
     {
@@ -2417,7 +2424,7 @@ void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
                     if (keyItems[k].first == keyGroupVector[j])
                     {
                         alreadyInVector = true;
-                        continue;
+                        break;
                     }
                 }
                 if (!alreadyInVector)
@@ -2551,7 +2558,9 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
             if (OutList.empty())
             {
                 refItemTarget[1] = "conditional";
- 
+                // check if condition is met
+                // if condition is not met, no mandatory items are found
+
                 refItemTable.Search(OutList, refItemTarget, refItemList);
                 if (OutList.empty())
                 {
