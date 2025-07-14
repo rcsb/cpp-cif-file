@@ -49,9 +49,9 @@ class CifFile : public TableFile
   public:
     std::string _parsingDiags;
     std::string _checkingDiags;
-    CifConditionalContext* _cctx;
+    CifConditionalContext* _cctx; //new
 
-    CifConditionalContext* GetCondContext(CifConditionalContext* cctx, Block& inBlock, Block& refBlock);
+    //CifConditionalContext* GetCondContext(CifConditionalContext& cctx, Block& inBlock, Block& refBlock); //new
 
     static const unsigned int STD_CIF_LINE_LENGTH = 80;
 
@@ -706,17 +706,33 @@ class CifFile : public TableFile
      ** \param[in] block - reference to a block that is to be checked
      ** \param[in] refBlock - reference to a reference block against which
      ** \param[out] log - reference to the output stream
-     ** 
+     ** \param[in] secKeyChecks - optional parameter that indicates whether secondary key checks should be performed (true by default).
+     **
      ** \return 0 - if all checks passed;
      ** \return different than 0 - if checks failed 
      */
     int CheckItems(Block& block, Block& refBlock, std::ostringstream& log, const bool secKeyChecks = true);
-    
+    /**
+     * Check conditional categories in the given block against the reference category table.
+     *
+     ** \param[in] inBlock - reference to the input block to be checked
+     ** \param[in] refCatTable - reference to the reference category table
+     ** \param[in] cctx - reference to the conditional context
+     ** \param[out] log - reference to the output stream
+     */
     void CheckConditionalCategories(Block& inBlock, ISTable& refCatTable,
-      CifConditionalContext& cctx, std::ostringstream& log);
-
+      CifConditionalContext& cctx, std::ostringstream& log); //new
+    /**
+     * Check conditional items in the given block against the reference item table.
+     *
+     ** \param[in] blockName - name of the block to be checked
+     ** \param[in] refCatTable - reference to the reference category table
+     ** \param[in] refItemTable - reference to the reference item table
+     ** \param[in] cctx - reference to the conditional context
+     ** \param[out] log - reference to the output stream
+     */
     void CheckConditionalItems(const std::string& blockName, ISTable& refCatTable,
-      ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log);
+      ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log); //new
 
 
   protected:
