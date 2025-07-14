@@ -36,7 +36,6 @@ class CifConditionalContext
   bool HaveConditionalMandatoryTableContext(const std::string& tableName);
   //void HaveConditionalMandatoryTableContext(bool present, const std::string& tableName);
 
-
   // Returns true is category tableName should be required/mandatory
   bool RequireTable(const std::string& tableName);
   //void RequireTable(bool required, const std::string& tableName);
@@ -48,6 +47,8 @@ class CifConditionalContext
   // Returns true if itemName column should be required/mandatory
   bool RequireItem(const std::string& itemName);
   //void RequireItem(bool required, const std::string& itemName);
+
+  void MakeItemMandatory(const std::string& itemName); //probably not needed
 
   // Returns the CifConditionalContextItemAction enum for a particular row
   CifConditionalContextItemAction GetConditionalMandatoryItemContext(const std::string& itemName, unsigned int row);

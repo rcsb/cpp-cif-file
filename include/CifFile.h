@@ -49,9 +49,7 @@ class CifFile : public TableFile
   public:
     std::string _parsingDiags;
     std::string _checkingDiags;
-    CifConditionalContext* _cctx; //new
-
-    //CifConditionalContext* GetCondContext(CifConditionalContext& cctx, Block& inBlock, Block& refBlock); //new
+    //CifConditionalContext* _cctx; //new
 
     static const unsigned int STD_CIF_LINE_LENGTH = 80;
 

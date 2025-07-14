@@ -82,15 +82,9 @@ bool CifConditionalContext::HaveConditionalMandatoryTableContext(const string& t
   {
     return false;
   }
-
-  unsigned int queryResult = _getConditionalTableRow(tableName);
-  if (queryResult != pdbxCatConditionalMandatory->GetNumRows()) 
-  {
-    return true;
-  }
   else
   {
-    return false;
+    return true;
   }
   
 }
@@ -98,12 +92,11 @@ bool CifConditionalContext::HaveConditionalMandatoryTableContext(const string& t
 // Determine if an entrire category is supposed to be required/made mandatory-- return true if so
 bool CifConditionalContext::RequireTable(const string& tableName) 
 {
-
-  if (pdbxCatConditionalMandatory == NULL || pdbxCatConditionalContext == NULL)
+  // if pdbx_category_conditional_mandatory is NULL, then pdbx_category_conditional_context is also NULL. if used within HaveConditionalMandatoryTableContext function, this should not trigger
+  if (pdbxCatConditionalContext == NULL)
   {
     return false;
   }
-  //if (pdbxCatConditionalMandatory == NULL) { return false; }
 
   unsigned int queryResult = _getConditionalTableRow(tableName);
 
@@ -120,15 +113,8 @@ bool CifConditionalContext::RequireTable(const string& tableName)
     {
       return true;
     }
-    else
-    {
-      return false;
-    }
   }
-  else
-  {
-    return false;
-  }
+  return false;
 
   // Else fall through - either no conditional context or allowed
 }
@@ -148,23 +134,20 @@ unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableN
   return queryResult;
 }
 
-
-// is this needed? does the exact same thing as the beginning of RequireItem
 bool CifConditionalContext::HaveConditionalMandatoryItemContext(const string& itemName) 
 {
-  // See if item exists in pdbx_item_conditional_context
+  // See if item exists in pdbx_item_conditional_context table
 
   if (pdbxItemConditionalMandatory == NULL)
-    {return false;}
-  
-  unsigned int queryResult = _getConditionalItemRow(itemName);
-  
-  if (queryResult != pdbxItemConditionalMandatory->GetNumRows()) {
-    return true;
-  }
+    {
+      //std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: No pdbx_item_conditional_mandatory table present." << std::endl;
+
+      return false;
+    }
   else
   {
-    return false;
+    //std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: pdbx_item_conditional_mandatory table is present. Potential conditional context exists." << std::endl;
+    return true;
   }
 }
 
@@ -172,9 +155,10 @@ bool CifConditionalContext::HaveConditionalMandatoryItemContext(const string& it
 bool CifConditionalContext::RequireItem(const string& itemName) 
 {
 
-  if (pdbxItemConditionalContext == NULL || pdbxItemConditionalMandatory == NULL)
+  if (pdbxItemConditionalContext == NULL)
     {
-      std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context or pdbx_item_conditional_mandatory table." << std::endl;
+      // if pdbx_item_conditional_mandatory is NULL, then pdbx_item_conditional_context is also NULL. if used within HaveConditionalMandatoryItemContext function, this should not trigger
+      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present."<< std::endl;
       return false;
     }
 
@@ -187,10 +171,6 @@ bool CifConditionalContext::RequireItem(const string& itemName)
     // Someday iterate possibly
     const string& action = (*pdbxItemConditionalContext)(queryResult, "action");
     const string& contextId = (*pdbxItemConditionalContext)(queryResult, "context_id");
-
-    if (action != "require" && action != "suppress-item" && action != "suppress-value" && action != "suppress-row") {
-      throw InvalidOptionsException("CifConditionalContext::RequireItem unknown action " + action);
-    }
     
     // Safety checks
     string tableName, colName;
@@ -216,15 +196,23 @@ bool CifConditionalContext::RequireItem(const string& itemName)
     {
       bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
 
-      // If action is suppress-item - any true will suppress
+      // any true conditional in list will require item to be mandatory if action is "require"
       if (ret && action == "require")
 	    {
+        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << std::endl; // TEST TEST
+        // add GetConditionalMandatoryItemContext function?
+        //MakeItemMandatory(itemName, row);?
         return true;
       }
     }
   }
     // No conditional context for item - so not required
     return false;
+}
+
+void CifConditionalContext::MakeItemMandatory(const string& itemName) //probably not needed
+{
+  //stuff
 }
 
 unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemName) 
@@ -237,10 +225,21 @@ unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemNam
   vector<string> queryCat;
   queryCat.push_back("item_name");
 
+  //const vector<string>& colNames = pdbxItemConditionalContext->GetColumnNames();
+  
+  //for (unsigned int rowI = 0; rowI < colNames.size(); ++rowI)
+  //{
+      //vector<string> values;
+      //pdbxItemConditionalContext->GetColumn(values, colNames[rowI]);
+      //for(unsigned int i = 0; i < values.size(); ++i)
+      //{
+        //std::cout << "CifConditionalContext::_getConditionalItemRow: Found item " << values[i] << " in column " << colNames[rowI] << " at row " << i << std::endl; // TEST TEST
+      //}
+  //}
+
   unsigned int queryResult = pdbxItemConditionalContext->FindFirst(queryTarget, queryCat);
   return queryResult;
 }
-
 
 CifConditionalContextItemAction CifConditionalContext::GetConditionalMandatoryItemContext(const string& itemName, unsigned int row) 
 {
@@ -381,7 +380,7 @@ bool CifConditionalContext::_evalConditional(const string &target_item_name, con
   ISTable* tobj;
   // test test
 
-  cout << "_evalConditional starting " << target_item_name << " " << target_item_value << " " << cmp_op << " " << rowItem<< endl;
+  //cout << "_evalConditional starting " << target_item_name << " " << target_item_value << " " << cmp_op << " " << rowItem<< endl;
 
   CifString::GetCategoryFromCifItem(lCatName, target_item_name);
   CifString::GetItemFromCifItem(lItemName, target_item_name);  

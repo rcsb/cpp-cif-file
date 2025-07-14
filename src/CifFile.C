@@ -377,9 +377,9 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
     CheckCategoryKey(block, buf);
     if (secKeyChecks)
     {
-        std::cout << "Checking sec. keys..." << std::endl;
+        //std::cout << "Checking sec. keys..." << std::endl;
         CheckCategorySecondaryKey(block, buf);
-        std::cout << "Finished checking sec. keys." << std::endl;
+        //std::cout << "Finished checking sec. keys." << std::endl;
     }
     else
     {
@@ -1525,8 +1525,6 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 
     CifConditionalContext* cctx = new CifConditionalContext(block, refBlockP); //new
 
-    //CifConditionalContext* _cctx = GetCondContext(cctx, block, refBlock); //new
-
     if (_extraCifChecks)
     {
         itemTableP = refBlock.GetTablePtr("pdbx_item");
@@ -2561,19 +2559,20 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
             refItemTarget[1] = "implicit-ordinal";
  
             refItemTable.Search(OutList, refItemTarget, refItemList);
-            if (OutList.empty())
-            {
-                refItemTarget[1] = "conditional";
+            //if (OutList.empty())
+            //{
+                //refItemTarget[1] = "conditional";
                 // check if condition is met
                 // if condition is not met, no mandatory items are found
+                // needed? because what if only conditional items are present? (not likely but still)
 
-                refItemTable.Search(OutList, refItemTarget, refItemList);
+                //refItemTable.Search(OutList, refItemTarget, refItemList);
                 if (OutList.empty())
                 {
                     log << "ERROR - In block \"" << blockName <<
                     "\", no mandatory items found in category \"" <<
                     catTable.GetName() << "\"" << endl;
-                }
+                //}
             }
 
         }
@@ -2640,13 +2639,8 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
 
 }
 
-//CifConditionalContext* CifFile::GetCondContext(CifConditionalContext& cctx, Block& inBlock, Block& refBlock)
-//{
-    //stuff
-//}
-
 void CifFile::CheckConditionalItems(const string& blockName, ISTable& catTable,
-  ISTable& refItemTable, CifConditionalContext& cctx, ostringstream& log) // need to check all items, not just key items
+  ISTable& refItemTable, CifConditionalContext& cctx, ostringstream& log)
 {
 
     /*
@@ -2655,7 +2649,7 @@ void CifFile::CheckConditionalItems(const string& blockName, ISTable& catTable,
     ** of those items in the category.
     */
     CifConditionalContext* cctxP = &cctx;
-    std::cout << "Testing items in category " << catTable.GetName() << endl; // TEST TEST
+    //std::cout << "Testing items in category " << catTable.GetName() << endl; // TEST TEST
 
     vector<string> refItemList;
     refItemList.push_back("category_id");
@@ -2669,43 +2663,46 @@ void CifFile::CheckConditionalItems(const string& blockName, ISTable& catTable,
     refItemTable.Search(OutList, refItemTarget, refItemList);
     if (OutList.empty())
     {
-        // No conditional items found
-        std::cout << "No conditional items found in category " << catTable.GetName() << endl; // TEST TEST
+        //std::cout << "No conditional items found in category " << catTable.GetName() << endl; // TEST TEST
         return;
     }
     else
     {
+        //std::cout << "Conditional items found in category " << catTable.GetName() << endl; // TEST TEST
         for (unsigned int k = 0; k < OutList.size(); ++k)
         {
             string cell = refItemTable(OutList[k], "name");
             string itemName;
             CifString::GetItemFromCifItem(itemName, cell);
-            //const string& itemName = temp;
-            // confirm that item does have conditional context
-            if ((*cctxP).HaveConditionalMandatoryItemContext(itemName)) //might not need, confirm if it's necessary
+            if ((*cctxP).HaveConditionalMandatoryItemContext(cell))
             {
-                std::cout << "Conditional item context exists for " << itemName << endl; // TEST TEST
-                //stuff
-                if ((*cctxP).RequireItem(itemName)) 
+                //std::cout << "Conditional item context exists for " << cell << endl; // TEST TEST
+                if ((*cctxP).RequireItem(cell)) 
                 {
-                    std::cout << "Item " << itemName << " is required." << endl;
-                    
-                    // need to implement GetConditionalMandatoryItemContext
+                    //std::cout << "Item " << cell << " is required." << endl; //TEST TEST
+                    if(!catTable.IsColumnPresent(itemName)) 
+                    {
+                        log << "ERROR - item \"" << itemName <<
+                            "\" is conditionally mandatory, but is not in category \"" <<
+                            catTable.GetName() << "\"" << endl;
+                        continue;
+                    }
+                    // Values for mandatory items must not be unknown.
+                    for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
+                    {
+                        if (catTable(rowI, itemName) == CifString::UnknownValue)
+                        {
+                            log << "ERROR - In block \"" << blockName <<
+                            "\", conditionally mandatory item \"" << cell <<
+                            "\" has invalid value \"" << catTable(rowI, itemName) <<
+                            "\"";
+                            log << endl; //modify loop to look like CheckMandatoryItems
+                        }
+                    }
                 }
                 else
                 {
-                    std::cout << "Item " << itemName << " is not required." << endl;
-                }
-                
-                if((*cctxP).RequireItem(itemName) && !catTable.IsColumnPresent(itemName)) 
-                {
-                    //stuff
-                    std::cout << "Conditional item context for " << itemName << " is required but is missing from category." << endl;
-                    log << "ERROR - In block \"" << blockName <<
-                        "\", item \"" << itemName <<
-                        "\" is conditionally mandatory but is not in category \"" << 
-                        catTable.GetName() << "\"" << endl;
-                    continue;
+                    //std::cout << "Item " << cell << " is not required." << endl; // TEST TEST
                 }
             }
         }
@@ -2718,7 +2715,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
   {
     vector<string> list;
     list.push_back("mandatory_code");
-    std::cout << "Testing category " << catTable.GetName() << endl; // TEST TEST
+    //std::cout << "Testing category " << catTable.GetName() << endl; // TEST TEST
 
     vector<string> target;
     target.push_back("conditional");
@@ -2729,8 +2726,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
     (*catTableP).Search(OutList, target, list);
     if (OutList.empty())
     {
-        std::cout << "No conditional categories found in block " << block.GetName() << endl; // TEST TEST
-        // No conditional items found
+        //std::cout << "No conditional categories found in block " << block.GetName() << endl; // TEST TEST
         return;
     }
     else
@@ -2738,24 +2734,24 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
         for (unsigned int i = 0; i < OutList.size(); i++)
         {
             const string& catName = (*catTableP)(OutList[i], "id");
-            std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
-            bool required;
-            if ((*cctxP).RequireTable(catName))
+            //std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
+            if ((*cctxP).HaveConditionalMandatoryTableContext(catName))
             {
-                std::cout << "Category " << catName << " is required." << endl;
+                if ((*cctxP).RequireTable(catName))
+                {
+                    //std::cout << "Category " << catName << " is required." << endl; // TEST TEST
+                    if (!block.IsTablePresent(catName)) 
+                    {
+                        log << "ERROR - category \"" << catName <<
+                        "\" is conditionally mandatory, but is not in datablock \"" <<
+                        block.GetName() << "\"" << endl;
+                    }
+                }
+                else
+                {
+                    //std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
+                }
             }
-            else
-            {
-                std::cout << "Category " << catName << " is not required." << endl;
-            }
-            if ((*cctxP).RequireTable(catName) && !block.IsTablePresent(catName)) 
-            {
-                //stuff
-                std::cout << "Conditional table context for " << catName << " is required." << endl;
-                log << "ERROR - category \"" << catName <<
-                    "\" is conditionally mandatory, but is not in datablock \"" <<
-                    block.GetName() << "\"" << endl;
-            }   
         }
     }
     //delete cctx;
