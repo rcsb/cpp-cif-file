@@ -26,29 +26,44 @@ enum CifConditionalContextItemAction {
 class CifConditionalContext
 {
  public:
-  // Constructor
+  /**
+   ** Constructs a CifConditionalContext object for the given block and reference block.
+   ** 
+   ** \param[in] inBlock - reference to a block that is to be checked
+   ** \param[in] ref - reference to a reference block against which inBlock is to be checked aginst.
+   * 
+   */
   CifConditionalContext(Block& inBlock, Block *ref);
 
-  // Destructor
+  /**
+   * Destroys the CifConditionalContext object.
+   ** 
+   ** \param None
+   */
   ~CifConditionalContext();
 
   // Returns true if category tableName has a conditional context
-  bool HaveConditionalMandatoryTableContext(const std::string& tableName);
-  //void HaveConditionalMandatoryTableContext(bool present, const std::string& tableName);
+  //bool HaveConditionalMandatoryTableContext(const std::string& tableName);
 
-  // Returns true is category tableName should be required/mandatory
+  /**
+   ** Determine if a category table should be required/mandatory.
+   ** \param[in] tableName - the name of the category table.
+   **
+   ** \return true if the table is required, false otherwise.
+   */
   bool RequireTable(const std::string& tableName);
-  //void RequireTable(bool required, const std::string& tableName);
 
   // Returns true if there is a conditional item context for itemName
-  bool HaveConditionalMandatoryItemContext(const std::string& itemName);
-  //void HaveConditionalMandatoryItemContext(bool present, const std::string& itemName);
+  //bool HaveConditionalMandatoryItemContext(const std::string& itemName);
 
-  // Returns true if itemName column should be required/mandatory
+  /**
+   ** Determine if an item column in a table should be required/mandatory.
+   **
+   ** \param[in] itemName - the name of the item column.
+   **
+   ** \return true if the item column is required, false otherwise.
+   */
   bool RequireItem(const std::string& itemName);
-  //void RequireItem(bool required, const std::string& itemName);
-
-  void MakeItemMandatory(const std::string& itemName); //probably not needed
 
   // Returns the CifConditionalContextItemAction enum for a particular row
   CifConditionalContextItemAction GetConditionalMandatoryItemContext(const std::string& itemName, unsigned int row);
@@ -65,20 +80,63 @@ class CifConditionalContext
   ISTable* pdbxConditionalContextList;
   ConditionalDataInfo condDataInfo;
 
-  // Evaluate a list of conditions
+  /**
+   ** Evaluates a list of conditions for a given context.
+   ** 
+   ** \param[in] context_id - the context identifier.
+   ** \param[in] catContext - indicates if this is a category context.
+   ** \param[in] catName - the name of the category.
+   ** 
+   ** \return true if the conditions are met, false otherwise.
+   */
   bool _evalConditionalList(const std::string &context_id,
 			    bool catContext, const std::string &catName);
+  /**
+   ** Evaluates a list of conditions for a given context.
+   ** 
+   ** \param[in] context_id - the context identifier.
+   ** \param[in] catContext - indicates if this is a category context.
+   ** \param[in] catName - the name of the category.
+   ** \param[in] item - the name of the item.
+   ** \param[in] row - the row index (default value is 0).
+   ** 
+   ** \return true if the conditions are met, false otherwise.
+   */
   bool _evalConditionalList(const std::string &context_id,
 			    bool catContext, const std::string &catName, const std::string &item, int row=0);
 
-  // Evaluate a single condition
+  /**
+   ** Evaluates a single condition for a target item.
+   ** 
+   ** \param[in] target_item_name - the name of the target item.
+   ** \param[in] target_item_value - the value of the target item.
+   ** \param[in] cmp_op - the comparison operator.
+   ** \param[in] catContext - indicates if this is a category context.
+   ** \param[in] catName - the name of the category.
+   ** \param[in] item - the name of the item.
+   ** \param[in] row - the row index (default value is 0).
+   ** 
+   ** \return true if the condition is met, false otherwise.
+   */
   bool _evalConditional(const std::string &target_item_name, const std::string &target_item_value,
 			const std::string &cmp_op, bool catContext, const std::string &catName, const std::string &item, int row=0);
 
-  // Returns the row tableName is in pdbx_category_conditional_context.
+  /**
+   ** Returns the row index of the specified category table in pdbx_category_conditional_context.
+   ** 
+   ** \param[in] tableName - the name of the category table.
+   ** 
+   ** \return the row index of the category table as an integer.
+   */
   unsigned int _getConditionalTableRow(const std::string& tableName);
 
-  // Returns the row itemName is in pdbx_item_conditional_context.
+  /**
+   ** Returns the row index of the specified item in pdbx_item_conditional_context.
+   ** 
+   ** \param[in] itemName - the name of the item.
+   ** 
+   ** \return the row index of the item as an integer.
+   */
   unsigned int _getConditionalItemRow(const std::string& itemName);  
 };
 

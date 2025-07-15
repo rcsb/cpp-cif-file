@@ -719,7 +719,7 @@ class CifFile : public TableFile
      ** \param[out] log - reference to the output stream
      */
     void CheckConditionalCategories(Block& inBlock, ISTable& refCatTable,
-      CifConditionalContext& cctx, std::ostringstream& log); //new
+      CifConditionalContext& cctx, std::ostringstream& log);
     /**
      * Check conditional items in the given block against the reference item table.
      *
@@ -730,7 +730,7 @@ class CifFile : public TableFile
      ** \param[out] log - reference to the output stream
      */
     void CheckConditionalItems(const std::string& blockName, ISTable& refCatTable,
-      ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log); //new
+      ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log);
 
 
   protected:

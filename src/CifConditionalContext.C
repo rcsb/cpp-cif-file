@@ -72,8 +72,8 @@ CifConditionalContext::~CifConditionalContext()
   // delete instances
 }
 
+/*
 // determine if table has conditional context
-// is this needed? does the exact same thing as the beginning of RequireTable
 bool CifConditionalContext::HaveConditionalMandatoryTableContext(const string& tableName) 
 {
 
@@ -88,13 +88,24 @@ bool CifConditionalContext::HaveConditionalMandatoryTableContext(const string& t
   }
   
 }
+*/
 
 // Determine if an entrire category is supposed to be required/made mandatory-- return true if so
 bool CifConditionalContext::RequireTable(const string& tableName) 
 {
-  // if pdbx_category_conditional_mandatory is NULL, then pdbx_category_conditional_context is also NULL. if used within HaveConditionalMandatoryTableContext function, this should not trigger
+  // Check if both conditional context tables are present
+  // pdbx_category_conditional_mandatory -> table that lists categories that have the potential to be conditionally required (specific to conditional mandatory context)
+  // pdbx_category_conditional_context -> table that lists the conditionals for categories (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
+  
+  // if statements will be concatenated in future
   if (pdbxCatConditionalContext == NULL)
   {
+    //std::cout << "CifConditionalContext::RequireTable: No pdbx_category_conditional_context table present for category."<< std::endl; // TEST TEST
+    return false;
+  }
+  if (pdbxCatConditionalMandatory == NULL)
+  {
+    //std::cout << "CifConditionalContext::RequireTable: No pdbx_category_conditional_mandatory table present for category."<< std::endl; // TEST TEST
     return false;
   }
 
@@ -114,9 +125,8 @@ bool CifConditionalContext::RequireTable(const string& tableName)
       return true;
     }
   }
+  // Else fall through - either no conditional context or is not required
   return false;
-
-  // Else fall through - either no conditional context or allowed
 }
 
 unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableName) 
@@ -134,31 +144,39 @@ unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableN
   return queryResult;
 }
 
+/*
+// See if item exists in pdbx_item_conditional_context table
 bool CifConditionalContext::HaveConditionalMandatoryItemContext(const string& itemName) 
 {
-  // See if item exists in pdbx_item_conditional_context table
-
   if (pdbxItemConditionalMandatory == NULL)
     {
-      //std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: No pdbx_item_conditional_mandatory table present." << std::endl;
-
+      std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: No pdbx_item_conditional_mandatory table present." << std::endl;
       return false;
     }
   else
   {
-    //std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: pdbx_item_conditional_mandatory table is present. Potential conditional context exists." << std::endl;
+    std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: pdbx_item_conditional_mandatory table is present. Potential conditional context exists." << std::endl;
     return true;
   }
 }
+*/
 
 // Determine if item should be required/made mandatory -- return true if so
 bool CifConditionalContext::RequireItem(const string& itemName) 
 {
-
+  // Check if both conditional context tables are present
+  // pdbx_item_conditional_mandatory -> table that lists items that have the potential to be conditionally required (specific to conditional mandatory context)
+  // pdbx_item_conditional_context -> table that lists the conditionals for items (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
+  
+  // if statements will be concatenated in future
   if (pdbxItemConditionalContext == NULL)
     {
-      // if pdbx_item_conditional_mandatory is NULL, then pdbx_item_conditional_context is also NULL. if used within HaveConditionalMandatoryItemContext function, this should not trigger
-      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present."<< std::endl;
+      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
+      return false;
+    }
+  if (pdbxItemConditionalMandatory == NULL)
+    {
+      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_mandatory table present for item."<< std::endl;
       return false;
     }
 
@@ -200,19 +218,12 @@ bool CifConditionalContext::RequireItem(const string& itemName)
       if (ret && action == "require")
 	    {
         //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << std::endl; // TEST TEST
-        // add GetConditionalMandatoryItemContext function?
-        //MakeItemMandatory(itemName, row);?
         return true;
       }
     }
   }
-    // No conditional context for item - so not required
+    // Else fall through - either no conditional context or is not required
     return false;
-}
-
-void CifConditionalContext::MakeItemMandatory(const string& itemName) //probably not needed
-{
-  //stuff
 }
 
 unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemName) 
@@ -241,9 +252,9 @@ unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemNam
   return queryResult;
 }
 
+// this function is not used -> is it needed? taken from original code
 CifConditionalContextItemAction CifConditionalContext::GetConditionalMandatoryItemContext(const string& itemName, unsigned int row) 
 {
-
   if (pdbxItemConditionalContext == NULL)
     return eNone;
 
@@ -288,10 +299,9 @@ CifConditionalContextItemAction CifConditionalContext::GetConditionalMandatoryIt
     return eAction;
   }
 
-  // Else fall through - either no conditional context or allowed
+  // Else fall through - either no conditional context or is not required
   return eNone;
 }
-// og function
 
 // Evaluates a conditional context list.
 // catContext: If this is a category or item test
@@ -380,7 +390,7 @@ bool CifConditionalContext::_evalConditional(const string &target_item_name, con
   ISTable* tobj;
   // test test
 
-  //cout << "_evalConditional starting " << target_item_name << " " << target_item_value << " " << cmp_op << " " << rowItem<< endl;
+  //cout << "_evalConditional starting " << target_item_name << " " << target_item_value << " " << cmp_op << " " << rowItem<< endl; // TEST TEST
 
   CifString::GetCategoryFromCifItem(lCatName, target_item_name);
   CifString::GetItemFromCifItem(lItemName, target_item_name);  
