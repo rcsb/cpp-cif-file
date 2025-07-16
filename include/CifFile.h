@@ -729,7 +729,7 @@ class CifFile : public TableFile
      ** \param[in] cctx - reference to the conditional context
      ** \param[out] log - reference to the output stream
      */
-    void CheckConditionalItems(const std::string& blockName, ISTable& refCatTable,
+    void CheckConditionalItems(Block& inBlock, ISTable& refCatTable,
       ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log);
 
 

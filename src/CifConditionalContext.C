@@ -12,6 +12,8 @@
 
 using std::exception;
 using std::ifstream;
+using std::ostream;
+using std::ostringstream;
 using std::cout;
 using std::cerr;
 using std::getline;
@@ -72,24 +74,6 @@ CifConditionalContext::~CifConditionalContext()
   // delete instances
 }
 
-/*
-// determine if table has conditional context
-bool CifConditionalContext::HaveConditionalMandatoryTableContext(const string& tableName) 
-{
-
-  // If no conditional context categories
-  if (pdbxCatConditionalMandatory == NULL)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-  
-}
-*/
-
 // Determine if an entrire category is supposed to be required/made mandatory-- return true if so
 bool CifConditionalContext::RequireTable(const string& tableName) 
 {
@@ -144,40 +128,25 @@ unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableN
   return queryResult;
 }
 
-/*
-// See if item exists in pdbx_item_conditional_context table
-bool CifConditionalContext::HaveConditionalMandatoryItemContext(const string& itemName) 
-{
-  if (pdbxItemConditionalMandatory == NULL)
-    {
-      std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: No pdbx_item_conditional_mandatory table present." << std::endl;
-      return false;
-    }
-  else
-  {
-    std::cout << "CifConditionalContext::HaveConditionalMandatoryItemContext: pdbx_item_conditional_mandatory table is present. Potential conditional context exists." << std::endl;
-    return true;
-  }
-}
-*/
-
 // Determine if item should be required/made mandatory -- return true if so
-bool CifConditionalContext::RequireItem(const string& itemName) 
+vector<bool> CifConditionalContext::RequireItem(const string& itemName) 
 {
   // Check if both conditional context tables are present
   // pdbx_item_conditional_mandatory -> table that lists items that have the potential to be conditionally required (specific to conditional mandatory context)
   // pdbx_item_conditional_context -> table that lists the conditionals for items (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
-  
+  vector<bool> condMandatoryMet;
   // if statements will be concatenated in future
   if (pdbxItemConditionalContext == NULL)
     {
       //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
-      return false;
+      condMandatoryMet.push_back(false);
+      return condMandatoryMet;
     }
   if (pdbxItemConditionalMandatory == NULL)
     {
       //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_mandatory table present for item."<< std::endl;
-      return false;
+      condMandatoryMet.push_back(false);
+      return condMandatoryMet;
     }
 
   unsigned int queryResult = _getConditionalItemRow(itemName);
@@ -199,31 +168,41 @@ bool CifConditionalContext::RequireItem(const string& itemName)
     // If category not in file - cannot require
     if (!_inBlock.IsTablePresent(tableName)) 
     {
-      return false;
+      condMandatoryMet.push_back(false);
+      return condMandatoryMet;
     }
 
-    // If column not in file - cannot require - should never happen
+    // If column not in file - cannot require
     ISTable* tobj = _inBlock.GetTablePtr(tableName);
     if (!tobj->IsColumnPresent(colName)) 
     {
-      return false;
+      condMandatoryMet.push_back(false); 
+      return condMandatoryMet;
     }
 
     // Iterate rows
     for (unsigned int row = 0; row < tobj->GetNumRows(); row++) 
     {
       bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
-
-      // any true conditional in list will require item to be mandatory if action is "require"
       if (ret && action == "require")
 	    {
-        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << std::endl; // TEST TEST
-        return true;
+        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << " with context id " << contextId << std::endl; // TEST TEST
+        condMandatoryMet.push_back(true);
+      }
+      else
+      {
+        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is not required based on conditional in row " << row << " with context id " << contextId << std::endl; // TEST TEST
+        condMandatoryMet.push_back(false);
       }
     }
   }
-    // Else fall through - either no conditional context or is not required
-    return false;
+  // Else fall through - either no conditional context or no instances of item are required
+  if (condMandatoryMet.empty())
+  {
+    //std::cout << "CifConditionalContext::RequireItem: No conditionals found for item " << itemName << std::endl; // TEST TEST
+    condMandatoryMet.push_back(false);
+  }
+  return condMandatoryMet;
 }
 
 unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemName) 

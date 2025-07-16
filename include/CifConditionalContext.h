@@ -63,7 +63,7 @@ class CifConditionalContext
    **
    ** \return true if the item column is required, false otherwise.
    */
-  bool RequireItem(const std::string& itemName);
+  std::vector<bool> RequireItem(const std::string& itemName);
 
   // Returns the CifConditionalContextItemAction enum for a particular row
   CifConditionalContextItemAction GetConditionalMandatoryItemContext(const std::string& itemName, unsigned int row);
