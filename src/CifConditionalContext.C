@@ -134,36 +134,24 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
   // Check if both conditional context tables are present
   // pdbx_item_conditional_mandatory -> table that lists items that have the potential to be conditionally required (specific to conditional mandatory context)
   // pdbx_item_conditional_context -> table that lists the conditionals for items (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
+  
   vector<bool> condMandatoryMet;
-  // if statements will be concatenated in future
-  if (pdbxItemConditionalContext == NULL)
-    {
-      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
-      condMandatoryMet.push_back(false);
-      return condMandatoryMet;
-    }
-  if (pdbxItemConditionalMandatory == NULL)
-    {
-      //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_mandatory table present for item."<< std::endl;
-      condMandatoryMet.push_back(false);
-      return condMandatoryMet;
-    }
-
-  unsigned int queryResult = _getConditionalItemRow(itemName);
-
-  // If so - test the conditional
-  if (queryResult != pdbxItemConditionalContext->GetNumRows()) 
+  if (pdbxItemConditionalContext == NULL || pdbxItemConditionalMandatory == NULL)
   {
-
-    // Someday iterate possibly
-    const string& action = (*pdbxItemConditionalContext)(queryResult, "action");
-    const string& contextId = (*pdbxItemConditionalContext)(queryResult, "context_id");
-    
+    //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
+    condMandatoryMet.push_back(false);
+    return condMandatoryMet;
+  }
+  
+  vector<unsigned int> queryResult = _getConditionalItemRows(itemName);
+  
+  if((queryResult[0] != pdbxItemConditionalMandatory->GetNumRows()))
+  {
     // Safety checks
     string tableName, colName;
     CifString::GetCategoryFromCifItem(tableName, itemName);
     CifString::GetItemFromCifItem(colName, itemName);
-    
+    ISTable* tobj = _inBlock.GetTablePtr(tableName);
 
     // If category not in file - cannot require
     if (!_inBlock.IsTablePresent(tableName)) 
@@ -173,29 +161,36 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
     }
 
     // If column not in file - cannot require
-    ISTable* tobj = _inBlock.GetTablePtr(tableName);
     if (!tobj->IsColumnPresent(colName)) 
     {
       condMandatoryMet.push_back(false); 
       return condMandatoryMet;
     }
-
-    // Iterate rows
-    for (unsigned int row = 0; row < tobj->GetNumRows(); row++) 
+    
+    for (unsigned int row = 0; row < tobj->GetNumRows(); row++) //swap
     {
-      bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
-      if (ret && action == "require")
-	    {
-        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << " with context id " << contextId << std::endl; // TEST TEST
-        condMandatoryMet.push_back(true);
-      }
-      else
+      bool instanceReq = false;
+      for (unsigned int i = 0; i < queryResult.size(); ++i) //swap
       {
-        //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is not required based on conditional in row " << row << " with context id " << contextId << std::endl; // TEST TEST
-        condMandatoryMet.push_back(false);
+        // If so - test the conditional
+        if (queryResult[i] != pdbxItemConditionalMandatory->GetNumRows()) 
+        {
+          const string& contextId = (*pdbxItemConditionalMandatory)(queryResult[i], "context_id");
+          //std::cout << "CifConditionalContext::_getConditionalItemRows: Found item " << itemName << " with context id " << contextId << " at row " << queryResult[i] << std::endl; // TEST TEST
+
+          // Iterate rows
+          bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
+          if (ret)
+	        {
+            //std::cout << "CifConditionalContext::RequireItem: Item " << itemName << " is required based on conditional in row " << row << " with context id " << contextId << std::endl; // TEST TEST
+            instanceReq = true;
+          }
+        }
       }
+      condMandatoryMet.push_back(instanceReq);
     }
   }
+
   // Else fall through - either no conditional context or no instances of item are required
   if (condMandatoryMet.empty())
   {
@@ -215,20 +210,26 @@ unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemNam
   vector<string> queryCat;
   queryCat.push_back("item_name");
 
-  //const vector<string>& colNames = pdbxItemConditionalContext->GetColumnNames();
-  
-  //for (unsigned int rowI = 0; rowI < colNames.size(); ++rowI)
-  //{
-      //vector<string> values;
-      //pdbxItemConditionalContext->GetColumn(values, colNames[rowI]);
-      //for(unsigned int i = 0; i < values.size(); ++i)
-      //{
-        //std::cout << "CifConditionalContext::_getConditionalItemRow: Found item " << values[i] << " in column " << colNames[rowI] << " at row " << i << std::endl; // TEST TEST
-      //}
-  //}
-
   unsigned int queryResult = pdbxItemConditionalContext->FindFirst(queryTarget, queryCat);
   return queryResult;
+}
+
+vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string& itemName) 
+{
+  // Returns row of conditional context if it exists or GetNumRows()
+
+  vector<string> queryTarget;
+  queryTarget.push_back(itemName);
+
+  vector<string> queryCat;
+  queryCat.push_back("item_name");
+  vector<unsigned int> OutList;
+
+  //const vector<string>& colNames = pdbxItemConditionalContext->GetColumnNames();
+  //const vector<string>& colNames2 = pdbxItemConditionalMandatory->GetColumnNames();
+
+  pdbxItemConditionalMandatory->Search(OutList, queryTarget, queryCat);
+  return OutList;
 }
 
 // this function is not used -> is it needed? taken from original code

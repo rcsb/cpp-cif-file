@@ -42,9 +42,6 @@ class CifConditionalContext
    */
   ~CifConditionalContext();
 
-  // Returns true if category tableName has a conditional context
-  //bool HaveConditionalMandatoryTableContext(const std::string& tableName);
-
   /**
    ** Determine if a category table should be required/mandatory.
    ** \param[in] tableName - the name of the category table.
@@ -52,9 +49,6 @@ class CifConditionalContext
    ** \return true if the table is required, false otherwise.
    */
   bool RequireTable(const std::string& tableName);
-
-  // Returns true if there is a conditional item context for itemName
-  //bool HaveConditionalMandatoryItemContext(const std::string& itemName);
 
   /**
    ** Determine if an item column in a table should be required/mandatory.
@@ -130,6 +124,8 @@ class CifConditionalContext
    */
   unsigned int _getConditionalTableRow(const std::string& tableName);
 
+  std::vector<unsigned int> _getConditionalTableRows(const std::string& tableName);
+
   /**
    ** Returns the row index of the specified item in pdbx_item_conditional_context.
    ** 
@@ -137,7 +133,8 @@ class CifConditionalContext
    ** 
    ** \return the row index of the item as an integer.
    */
-  unsigned int _getConditionalItemRow(const std::string& itemName);  
+  unsigned int _getConditionalItemRow(const std::string& itemName); 
+  std::vector<unsigned int> _getConditionalItemRows(const std::string& itemName);   
 };
 
 #endif
