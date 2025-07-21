@@ -2683,7 +2683,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
             {
                 if (conditionsMet[i]) 
                 {
-                    std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
+                    //std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
 
                     // Values for mandatory items must not be unknown.
                     if (catTable(i, itemName) == CifString::UnknownValue)
@@ -2699,7 +2699,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
                     // works but do not like
                     if(block.IsTablePresent(catTable.GetName()) && catTable.IsColumnPresent(itemName)) // TEST TEST (temp if statement)
                     {
-                        std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
+                        //std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
                     }
                     if(!block.IsTablePresent(catTable.GetName()))
                     {
@@ -2748,7 +2748,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
             //std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
             if ((*cctxP).RequireTable(catName))
             {
-                //std::cout << "Category " << catName << " is required." << endl; // TEST TEST
+                std::cout << "Category " << catName << " is required." << endl; // TEST TEST
                 if (!block.IsTablePresent(catName)) 
                 {
                     log << "ERROR - category \"" << catName <<
