@@ -52,7 +52,6 @@ static cmp_code getCmpCode(const string &op) {
 // Constructor
 CifConditionalContext::CifConditionalContext(Block& inBlock, Block *refBlock) :_inBlock(inBlock), condDataInfo(*refBlock)
 {
-  // std::cout << "Conditional context init" << std::endl;
   _catConditionalContext = NULL;
   _itemConditionalContext = NULL;
   _refBlock = refBlock;
@@ -71,18 +70,22 @@ CifConditionalContext::CifConditionalContext(Block& inBlock, Block *refBlock) :_
 // Destructor
 CifConditionalContext::~CifConditionalContext()
 {
-  // delete instances
+  
 }
 
 // Determine if an entrire category is supposed to be required/made mandatory-- return true if so
 bool CifConditionalContext::RequireTable(const string& tableName) 
 {
+  /*
+  **
+  */
+
   // Check if both conditional context tables are present
   // pdbx_category_conditional_mandatory -> table that lists categories that have the potential to be conditionally required (specific to conditional mandatory context)
   // pdbx_category_conditional_context -> table that lists the conditionals for categories (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
   
   // if statements will be concatenated in future
-  if (pdbxCatConditionalContext == NULL || pdbxCatConditionalMandatory == NULL)
+  if (pdbxCatConditionalContext == NULL || pdbxCatConditionalMandatory == NULL) //need both?
   {
     //std::cout << "CifConditionalContext::RequireTable: No pdbx_category_conditional_context table present for category."<< std::endl; // TEST TEST
     return false;
@@ -113,7 +116,7 @@ bool CifConditionalContext::RequireTable(const string& tableName)
 vector<unsigned int> CifConditionalContext::_getConditionalTableRows(const string& tableName) 
 {
   // See if table in pdbx_category_conditional_mandatory
-  // Returns count to row in category conditional context with category - or GetNumRows()
+  // Returns count/s to row/s in category conditional mandatory with category - or GetNumRows()
   vector<string> queryTarget;
   queryTarget.push_back(tableName);
 
@@ -146,11 +149,15 @@ unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableN
 // Determine if item should be required/made mandatory -- return true if so
 vector<bool> CifConditionalContext::RequireItem(const string& itemName) 
 {
+  /*
+  **
+  */
+
   // Check if both conditional context tables are present
   // pdbx_item_conditional_mandatory -> table that lists items that have the potential to be conditionally required (specific to conditional mandatory context)
   // pdbx_item_conditional_context -> table that lists the conditionals for items (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
   vector<bool> condMandatoryMet;
-  if (pdbxItemConditionalContext == NULL || pdbxItemConditionalMandatory == NULL)
+  if (pdbxItemConditionalContext == NULL || pdbxItemConditionalMandatory == NULL) //need both?
   {
     //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
     condMandatoryMet.push_back(false);
@@ -174,12 +181,13 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
       return condMandatoryMet;
     }
 
+    // OLD
     // If column not in file - cannot require
-    if (!tobj->IsColumnPresent(colName)) 
-    {
-      condMandatoryMet.push_back(false); 
-      return condMandatoryMet;
-    }
+    //if (!tobj->IsColumnPresent(colName)) 
+    //{
+      //condMandatoryMet.push_back(false); 
+      //return condMandatoryMet;
+    //}
     
     for (unsigned int row = 0; row < tobj->GetNumRows(); row++)
     {
@@ -230,7 +238,7 @@ unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemNam
 
 vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string& itemName) 
 {
-  // Returns row of conditional context if it exists or GetNumRows()
+  // Returns vector of row indices of conditional context if it exists or GetNumRows()
 
   vector<string> queryTarget;
   queryTarget.push_back(itemName);

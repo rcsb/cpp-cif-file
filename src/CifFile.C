@@ -300,6 +300,11 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
   const bool extraDictChecks, const bool extraCifChecks,
   const std::vector<std::string>& skipBlockNames, const bool secKeyChecks)
 {
+    /*
+    ** Checks data present in a Cif file against a reference dictionary (e.g. sdb file, ddl file)
+    ** Gets block names from Cif file and checks the contents of each block against the reference dictionary
+    */
+
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
     _secKeyChecks = secKeyChecks;
@@ -309,6 +314,7 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
     ofstream log;
     log.open(diagFileName.c_str(), ios::out | ios::app);
 
+    // get reference block information from dictionary
     vector<string> refBlockNames;
     ref.GetBlockNames(refBlockNames);
 
@@ -320,6 +326,7 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
     Block& refBlock = ref.GetBlock(ref.GetFirstBlockName());
 
+    // get information from each block in Cif file and compare against reference block
     vector<string> BlockNames;
     GetBlockNames(BlockNames);
 
@@ -366,6 +373,11 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
   const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks)
 {
+    /*
+    ** Checks data present in a Cif file against a reference dictionary (e.g. sdb file, ddl file)
+    ** For a given block, checks the contents of the block against the reference dictionary
+    ** Includes checks for categories, items, item types, and (if secKeyChecks is true) secondary keys 
+    */
 
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
@@ -377,13 +389,7 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
     CheckCategoryKey(block, buf);
     if (secKeyChecks)
     {
-        //std::cout << "Checking sec. keys..." << std::endl;
         CheckCategorySecondaryKey(block, buf);
-        //std::cout << "Finished checking sec. keys." << std::endl;
-    }
-    else
-    {
-        //std::cout << "Skipping sec. keys checking." << std::endl;
     }
     CheckItemsTable(block, buf);
     ret2 = CheckItems(block, refBlock, buf, secKeyChecks);
@@ -1294,6 +1300,9 @@ void CifFile::_PrintHeaderedItems(ostream& cifo,
 
 int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
 {
+    /*
+    ** Determines if conditional categories should be treated as mandatory and checks for the presence of mandatory categories in the block
+    */
 
     int ret = 1;
 
@@ -1335,6 +1344,11 @@ int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
 
 void CifFile::CheckCategoryKey(Block& block, ostringstream& log)
 {
+    /*
+    ** Checks the category key table for mandatory and implicit items
+    ** and validates that they are both defined in the item table and contain valid values.
+    ** If key item is defined as not mandatory or implicit or is not defined at all, it will report an error.
+    */
 
     ISTable* catKeyTableP = block.GetTablePtr("category_key");
 
@@ -1392,6 +1406,11 @@ void CifFile::CheckCategoryKey(Block& block, ostringstream& log)
 
 void CifFile::CheckCategorySecondaryKey(Block& block, ostringstream& log)
 {
+    /*
+    ** Checks the category secondary key table for mandatory and implicit items
+    ** and validates that both the key id and the item name contain valid values.
+    ** If item name is not defined at all in the item table, it will report an error.
+    */
 
     ISTable* catSecKeyTableP = block.GetTablePtr("category_secondary_key");
 
@@ -1404,7 +1423,7 @@ void CifFile::CheckCategorySecondaryKey(Block& block, ostringstream& log)
     vector<string> searchCols;
     searchCols.push_back("name");
 
-    // For every item in the category key table, validate key_id and item_name
+    // for every item in the category key table, validate key_id and item_name
     for (unsigned int itemI = 0; itemI < catSecKeyTableP->GetNumRows(); ++itemI)
     {
         const string& cifItemId = (*catSecKeyTableP)(itemI, "key_id");
@@ -1447,6 +1466,12 @@ void CifFile::CheckCategorySecondaryKey(Block& block, ostringstream& log)
 
 void CifFile::CheckItemsTable(Block& block, ostringstream& log)
 {
+    /*
+    ** Checks through the item table to make sure that the category name is consistent
+    ** between what is listed in _item.name and the value of _item.category_id in the item table.
+    ** Also checks that the category is defined in the category table.
+    */
+
     ISTable* itemsTableP = block.GetTablePtr("item");
 
     ISTable* catsTableP = block.GetTablePtr("category");
@@ -1463,7 +1488,7 @@ void CifFile::CheckItemsTable(Block& block, ostringstream& log)
     cout << "Items table: " << *itemsTableP << endl;
 #endif
 
-    // Check if "_item.category_id" matches the one in "_item.name"
+    // Check if "_item.category_id" value matches the one present in "_item.name"
     for (unsigned int rowI = 0; rowI < itemsTableP->GetNumRows(); ++rowI)
     {
         const string& cifItem = (*itemsTableP)(rowI, "name");
@@ -1496,6 +1521,15 @@ void CifFile::CheckItemsTable(Block& block, ostringstream& log)
 
 int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const bool secKeyChecks)
 {
+    /*
+    ** Checks if categories and items in the block are defined in the reference file.
+    ** Determines key items and (if applicable) secondary key items and checks if they are defined in the item table.
+    ** Finds mandatory items and checks if they are defined in the item table.
+    ** If items are conditionally mandatory, checks whether to treat them as mandatory or not.
+    ** Determines if the item is a member of a parent-child relationship and, if so, gets parent items and validates
+    ** values for both parent and child items.
+    */
+
     int ret = 1;
  
     // Get references to relevant dictionary categories
@@ -1510,6 +1544,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
     // of "category_key" and "category_secondary_key" category is implicitly set from the category name of
     // category save frame in the reference file and that category name in
     // category save frame is uppercase.
+
     catKeyTableP->SetFlags("id", ISTable::DT_STRING | ISTable::CASE_INSENSE);
 
     if (catSecKeyTableP != NULL)
@@ -1521,9 +1556,9 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
     ISTable* itemTypeTableP = NULL;
     ISTable* itemRangeTableP = NULL;
     ISTable* itemEnumTableP = NULL;
-    Block* refBlockP = &refBlock; //new
+    Block* refBlockP = &refBlock;
 
-    CifConditionalContext* cctx = new CifConditionalContext(block, refBlockP); //new
+    CifConditionalContext* cctx = new CifConditionalContext(block, refBlockP);
 
     if (_extraCifChecks)
     {
@@ -1603,6 +1638,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 
         const vector<string>& colNames = catTableP->GetColumnNames();
 
+        // Check if the items in the table are defined in the reference file
         for (unsigned int itemI = 0; itemI < colNames.size(); ++itemI)
         {
             if (!IsItemDefinedInRef(catNames[catI], colNames[itemI],
@@ -1633,7 +1669,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
           keyAttributes, log);
 
         // determine if conditional items are present in the category table, and if so, see if they should be treated as mandatory
-        CheckConditionalItems(block, *catTableP, *itemTableP, *cctx, log); // fixme
+        CheckConditionalItems(block, *catTableP, *itemTableP, *cctx, log);
 
         // if secondary key table exists and secondary key checks are not disabled, get key attributes for secondary key table and check them
         if (secKeyChecks && (catSecKeyTableP != NULL))
@@ -1692,6 +1728,10 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 void CifFile::FindCifNullRows(vector<unsigned int>& nullRowsIndices,
   const ISTable& isTable)
 {
+    /*
+    ** Finds all rows in a category table that contain only null values.
+    */
+
     nullRowsIndices.clear();
 
     const vector<string>& colNames = isTable.GetColumnNames();
@@ -1715,13 +1755,12 @@ void CifFile::FindCifNullRows(vector<unsigned int>& nullRowsIndices,
     }
 }
 
-
-// This method converts the string with embedded escape sequences into
-// the real string. For example, a two character combination "\t" is
-// converted into one character representing horizontal tab.
 void CifFile::ConvertEscapedString(const string& inString,
   string& outString)
 {
+    // This method converts the string with embedded escape sequences into
+    // the real string. For example, a two character combination "\t" is
+    // converted into one character representing horizontal tab.
 
     outString.clear();
 
@@ -1767,6 +1806,10 @@ void CifFile::GetAttributeValueIf(string& attribVal,
   const string& blockId, const string& category, const string& attributeA,
   const string& attributeB, const string& valB)
 {
+    /*
+    ** Finds the attribute value (attribVal) in the specified block and category for attributeA
+    ** based on the first occurrence of attributeB with value valB.
+    */
 
     attribVal.clear();
 
@@ -1804,6 +1847,10 @@ void CifFile::GetAttributeValuesIf(vector<string>& strings,
   const string& blockId, const string& category, const string& attributeA,
   const string& attributeB, const string& valB)
 {
+    /*
+    ** Finds the attribute values (strings) in the specified block and category for attributeA
+    ** based on the rows where attributeB has a value valB.
+    */
 
     strings.clear();
 
@@ -1835,6 +1882,10 @@ void CifFile::SetAttributeValueIf(const string& blockId,
   const string& category, const string& attributeA, const string& valA, 
   const string& attributeB, const string& valB, const bool create)
 {
+    /*
+    ** Update cells of attributeA with valA for each row index corresponding to row indexes of attributeB that have
+    ** a value of valB
+    */
 
     if (blockId.empty() || category.empty() || valA.empty() ||
       attributeA.empty() || attributeB.empty() || valB.empty())
@@ -1890,6 +1941,9 @@ void CifFile::SetAttributeValue(const string& blockId,
   const string& category, const string& attribute, const string& value,
   const bool create)
 {
+    /*
+    ** For a column "attribute" in a given category table, update value of all rows to "value"
+    */
 
     if (blockId.empty() || category.empty() || attribute.empty() ||
       value.empty())
@@ -1976,6 +2030,10 @@ const char *attributeB, const char *valB)
 void CifFile::GetAttributeValue(string& attribVal, const string& blockId,
   const string& category, const string& attribute)
 {
+    /*
+    ** Get attribute value from a specific block and category at row index 0
+    */
+
   attribVal.clear();
 
   Block& block = GetBlock(blockId);
@@ -2004,6 +2062,10 @@ void CifFile::GetAttributeValue(string& attribVal, const string& blockId,
 void CifFile::GetAttributeValues(vector<string>& strings,
    const string& blockId, const string& category, const string& attribute)
 {
+    /*
+    ** Get attribute values from a specific block and category
+    */
+
   strings.clear();
 
   Block& block = GetBlock(blockId);
@@ -2030,6 +2092,9 @@ void CifFile::SetAttributeValues(const string& blockId,
   const string& category, const string& attribute,
   const vector<string>& values)
 {
+    /*
+    ** Fill a column "attribute" in a given category table with values
+    */
 
   if (blockId.empty() || category.empty() || attribute.empty() ||
     values.empty())
@@ -2056,6 +2121,9 @@ void CifFile::SetAttributeValues(const string& blockId,
 bool CifFile::IsAttributeValueDefined(const string& blockId,
   const string& category, const string& attribute)
 {
+    /*
+    ** Determine if value of an attribute is defined (i.e. not inapplicable or unknown) in a given block and category.
+    */
 
   if (blockId.empty() || category.empty() || attribute.empty())
       return(false);
@@ -2109,6 +2177,9 @@ bool CifFile::IsAttributeValueDefined(const string& blockId,
 void CifFile::SetAttributeValueIfNull(const string& blockId, const string& category,
   const string& attribute, const string& value)
 {
+    /*
+    ** If column "attribute" is empty, fill it with value "value"
+    */
 
   if (blockId.empty() || category.empty() || attribute.empty() ||
     value.empty())
@@ -2269,7 +2340,9 @@ void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
 {
     /*
     ** For a category, method checks for existence of key
-    ** items and checks if there are duplicate key values.
+    ** items in category. Only implicit key items are allowed to be missing from the category table.
+    ** If key is implicit, values are obtained from the item default table.
+    ** Key values are also checked for duplicates.
     */
 
     if (keyItems.empty())
@@ -2377,15 +2450,15 @@ void CifFile::CheckKeyItems(const string& blockName, ISTable& catTable,
     }
 }
 
-// check for secondary keys
-// FIXME
 void CifFile::CheckSecondaryKeyItems(const string& blockName, ISTable& catTable,
   const vector<pair<string, string> >& keyItems, ISTable& itemTable, ostringstream& log)
 {
     /*
     ** For a category, method checks for existence of key
-    ** items and, if they exist, checks if there are duplicate key values.
+    ** items and, if they exist, checks if there are duplicate key values. If item_name key values are
+    ** set as inapplicable, they are changed to unknown values.
     */
+
     if (keyItems.empty())
     {
         return;
@@ -2535,6 +2608,7 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
     ** For a category, method looks into dictionary ("item" table)
     ** to find out what its mandatory items are. Then it checks for existence
     ** of those items in the category.
+    ** Every category must have at least one mandatory item.
     */
 
     vector<string> refItemList;
@@ -2559,25 +2633,9 @@ void CifFile::CheckMandatoryItems(const string& blockName, ISTable& catTable,
             refItemTable.Search(OutList, refItemTarget, refItemList);
             if (OutList.empty())
             {
-                refItemTarget[1] = "conditional";
-                // check if condition/s are met
-                // if condition is not met, no mandatory items are found
-                // needed? because what if only conditional items are present? (not likely but still)
-
-                refItemTable.Search(OutList, refItemTarget, refItemList);
-                if (OutList.empty())
-                {
-                    log << "ERROR - In block \"" << blockName <<
+                log << "ERROR - In block \"" << blockName <<
                     "\", no mandatory items found in category \"" <<
                     catTable.GetName() << "\"" << endl;
-                }
-                else
-                {
-                    //placeholder for conditional items
-                    log << "ERROR - In block \"" << blockName <<
-                    "\", no mandatory items found in category \"" <<
-                    catTable.GetName() << "\"" << endl;
-                }
             }
         }
     }
@@ -2649,10 +2707,10 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
     /*
     ** For a category, method looks into dictionary ("item" table)
     ** to find out if any items are conditional. Then it checks for existence
-    ** of those items in the category.
+    ** of those items in the category and whether the conditional is met.
     */
+
     CifConditionalContext* cctxP = &cctx;
-    //std::cout << "Testing items in category " << catTable.GetName() << endl; // TEST TEST
 
     vector<string> refItemList;
     refItemList.push_back("category_id");
@@ -2671,7 +2729,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
     }
     else
     {
-        //std::cout << "Conditional items found in category " << catTable.GetName() << endl; // TEST TEST
+        std::cout << "Conditional items found in category " << catTable.GetName() << endl; // TEST TEST
         for (unsigned int k = 0; k < OutList.size(); ++k)
         {
             string cell = refItemTable(OutList[k], "name");
@@ -2683,7 +2741,14 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
             {
                 if (conditionsMet[i]) 
                 {
-                    //std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
+                    std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
+                    if(!catTable.IsColumnPresent(itemName)) 
+                    {
+                        log << "ERROR - Item \"" << itemName <<
+                        "\" is conditionally mandatory, but is not found in category \"" <<
+                        catTable.GetName() << "\"" << endl;
+                        break;
+                    }
 
                     // Values for mandatory items must not be unknown.
                     if (catTable(i, itemName) == CifString::UnknownValue)
@@ -2693,6 +2758,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
                             "\" has invalid value \"" << catTable(i, itemName) << 
                             "\" " << endl; //better wording?
                     }
+                    
                 }
                 else
                 { 
@@ -2701,19 +2767,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
                     {
                         //std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
                     }
-                    if(!block.IsTablePresent(catTable.GetName()))
-                    {
-                        log << "ERROR - Item \"" << cell <<
-                        "\" might be conditionally mandatory, but category \"" <<
-                        catTable.GetName() << "\" is not in datablock \"" <<
-                        block.GetName() << "\"" << endl;
-                    }
-                    if(!catTable.IsColumnPresent(itemName)) 
-                    {
-                        log << "ERROR - Item \"" << itemName <<
-                        "\" might be conditionally mandatory, but is not found in category \"" <<
-                        catTable.GetName() << "\"" << endl;
-                    }
+                    
                 }
             }
         }
@@ -2724,6 +2778,12 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
 void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
   CifConditionalContext& cctx, ostringstream& log) 
 {
+    /*
+    ** For a category, method looks into dictionary ("category" table)
+    ** to find out if any categories are conditional. Then it checks for existence
+    ** of those categories in the block and whether the condition is met.
+    */
+
     vector<string> list;
     list.push_back("mandatory_code");
     //std::cout << "Testing category " << catTable.GetName() << endl; // TEST TEST
@@ -3505,6 +3565,10 @@ void CifFile::GetItemTypeCode(string& typeCode, const string& cifItemName,
 void CifFile::CheckKeyValues(const vector<string>& keysAttribs,
   ISTable& catTable, ostringstream& log)
 {
+    /*
+    ** Check if key items have valid values (e.g. values cannot be empty).
+    */
+
     for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
     {
         for (unsigned int keyI = 0; keyI < keysAttribs.size(); ++keyI)
@@ -3558,6 +3622,10 @@ void CifFile::CheckKeyValues(const vector<string>& keysAttribs,
 void CifFile::CheckSecondaryKeyValues(vector<string>& missingValues, const vector<string>& keysAttribs,
   ISTable& catTable, ostringstream& log)
 {
+    /*
+    ** Check if secondary item_name keys have valid values (e.g. values cannot be inapplicable).
+    */
+
     missingValues.clear();
     for (unsigned int keyI = 0; keyI < catTable.GetNumRows(); ++keyI)
     {
@@ -3578,6 +3646,11 @@ void CifFile::CheckSecondaryKeyValues(vector<string>& missingValues, const vecto
 void CifFile::FixInapplicableValues(ISTable& catTable,
   const vector<string>& itemNames, ostringstream& log)
 {
+    /*
+    ** If a secondary item_name key has an inapplicable value, change it to a missing value.
+    ** Allows for better determination of duplicate secondary keys.
+    */
+
     for (unsigned int keyInd = 0; keyInd < itemNames.size(); ++keyInd)
     {
         for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
@@ -3595,6 +3668,10 @@ void CifFile::FixInapplicableValues(ISTable& catTable,
 bool CifFile::IsImplicitNatureKey(const string& catName,
   const string& attribName, ISTable& itemTable)
 {
+    /*
+    ** Check if an item is an implicit key.
+    */
+
     vector<string> refItemList;
     refItemList.push_back("name");
     refItemList.push_back("mandatory_code");
@@ -3630,6 +3707,7 @@ void CifFile::GetImplNatureKeysWithMissingValues(vector<string>& implKeyItems,
 {
     // Return vector of keys (as CIF items) having implicit nature for which
     // some of values in the category table are unknown
+
     implKeyItems.clear();
 
     vector<string> allImplNatKeyItems;
@@ -3652,6 +3730,10 @@ void CifFile::FixMissingValuesOfImplNatureKeys(ISTable& catTable,
   const vector<string>& implNatureKeys, ISTable& refItemDefaultTable,
   ostringstream& log)
 {
+    /*
+    ** If item is an implicit key, check if it has a default value and (if so) update its value.
+    */
+
     for (unsigned int keyInd = 0; keyInd < implNatureKeys.size(); ++keyInd)
     {
         string defValue;
@@ -3689,6 +3771,10 @@ void CifFile::FixMissingValuesOfImplNatureKeys(ISTable& catTable,
 void CifFile::GetImplNatureKeys(vector<string>& implNatureKeys,
   const string& catName, ISTable& refItemTable)
 {
+    /*
+    ** Get a list of implicit keys for a category.
+    */
+
     implNatureKeys.clear();
 
     vector<string> attribsNames;
@@ -3724,6 +3810,10 @@ void CifFile::GetImplNatureKeys(vector<string>& implNatureKeys,
 
 bool CifFile::AreSomeValuesInColumnEmpty(ISTable& table, const string& colName)
 {
+    /*
+    ** Determine if some values in a column are empty or if column is missing altogether.
+    */
+
     if (!table.IsColumnPresent(colName))
     {
         return true;
@@ -3746,6 +3836,10 @@ bool CifFile::AreSomeValuesInColumnEmpty(ISTable& table, const string& colName)
 void CifFile::GetItemDefaultValue(string& defValue, const string& implNatKey,
   ISTable& refItemDefaultTable)
 {
+    /*
+    ** Get default value of an implicit key.
+    */
+
     defValue.clear();
 
     vector<string> attribsNames;
