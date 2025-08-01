@@ -1321,6 +1321,7 @@ int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
     refCatTableP->Search(OutList, target, list);
     if (OutList.empty())
     {
+        delete cctx;
         return(ret);
     }
 
@@ -2724,24 +2725,24 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
     refItemTable.Search(OutList, refItemTarget, refItemList);
     if (OutList.empty())
     {
-        //std::cout << "No conditional items found in category " << catTable.GetName() << endl; // TEST TEST
         return;
     }
     else
     {
-        std::cout << "Conditional items found in category " << catTable.GetName() << endl; // TEST TEST
+        //std::cout << "Conditional items found in category " << catTable.GetName() << endl; // TEST TEST
         for (unsigned int k = 0; k < OutList.size(); ++k)
         {
             string cell = refItemTable(OutList[k], "name");
             string itemName;
             CifString::GetItemFromCifItem(itemName, cell);
-            //std::cout << "Conditional item context exists for " << cell << endl; // TEST TEST
+            std::cout << "Conditional item context exists for " << cell << endl; // TEST TEST
             vector<bool> conditionsMet = (*cctxP).RequireItem(cell);
             for (unsigned int i = 0; i < conditionsMet.size(); ++i)
             {
                 if (conditionsMet[i]) 
                 {
                     std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
+                    // Mandatory items must be present in category
                     if(!catTable.IsColumnPresent(itemName)) 
                     {
                         log << "ERROR - Item \"" << itemName <<
@@ -2756,16 +2757,15 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
                         log << "ERROR - In block \"" << block.GetName() <<
                             "\", instance " << i << " of conditionally mandatory item \"" << cell <<
                             "\" has invalid value \"" << catTable(i, itemName) << 
-                            "\" " << endl; //better wording?
+                            "\" " << endl;
                     }
                     
                 }
                 else
                 { 
-                    // works but do not like
                     if(block.IsTablePresent(catTable.GetName()) && catTable.IsColumnPresent(itemName)) // TEST TEST (temp if statement)
                     {
-                        //std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
+                        std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
                     }
                     
                 }
@@ -2797,7 +2797,6 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
     (*catTableP).Search(OutList, target, list);
     if (OutList.empty())
     {
-        //std::cout << "No conditional categories found in block " << block.GetName() << endl; // TEST TEST
         return;
     }
     else
@@ -2805,7 +2804,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
         for (unsigned int i = 0; i < OutList.size(); i++)
         {
             const string& catName = (*catTableP)(OutList[i], "id");
-            //std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
+            std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
             if ((*cctxP).RequireTable(catName))
             {
                 std::cout << "Category " << catName << " is required." << endl; // TEST TEST
@@ -2818,7 +2817,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
             }
             else
             {
-                //std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
+                std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
             }
             
         }
@@ -3627,9 +3626,9 @@ void CifFile::CheckSecondaryKeyValues(vector<string>& missingValues, const vecto
     */
 
     missingValues.clear();
-    for (unsigned int keyI = 0; keyI < catTable.GetNumRows(); ++keyI)
+    for (unsigned int keyI = 0; keyI < keysAttribs.size(); ++keyI)
     {
-        for (unsigned int rowI = 0; rowI < keysAttribs.size(); ++rowI)
+        for (unsigned int rowI = 0; rowI < catTable.GetNumRows(); ++rowI)
         {
             const string& value = catTable(rowI, keysAttribs[keyI]);
 

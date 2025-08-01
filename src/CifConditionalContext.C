@@ -63,8 +63,6 @@ CifConditionalContext::CifConditionalContext(Block& inBlock, Block *refBlock) :_
   pdbxItemConditionalMandatory = block.GetTablePtr("pdbx_item_conditional_mandatory");
   pdbxConditionalContextList = block.GetTablePtr("pdbx_conditional_context_list");
 
-  ConditionalDataInfo cDataInfo(*refBlock);
-
 }
 
 // Destructor
@@ -180,14 +178,6 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
       condMandatoryMet.push_back(false);
       return condMandatoryMet;
     }
-
-    // OLD
-    // If column not in file - cannot require
-    //if (!tobj->IsColumnPresent(colName)) 
-    //{
-      //condMandatoryMet.push_back(false); 
-      //return condMandatoryMet;
-    //}
     
     for (unsigned int row = 0; row < tobj->GetNumRows(); row++)
     {
