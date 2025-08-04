@@ -298,7 +298,8 @@ void CifFile::WriteNmrStar(const string& nmrStarFileName,
 
 int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
   const bool extraDictChecks, const bool extraCifChecks,
-  const std::vector<std::string>& skipBlockNames, const bool secKeyChecks)
+  const std::vector<std::string>& skipBlockNames, const bool secKeyChecks, const bool condMandatoryCatChecks, 
+  const bool condMandatoryItemChecks)
 {
     /*
     ** Checks data present in a Cif file against a reference dictionary (e.g. sdb file, ddl file)
@@ -308,6 +309,8 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
     _secKeyChecks = secKeyChecks;
+    _condMandCatChecks = condMandatoryCatChecks;
+    _condMandItemChecks = condMandatoryItemChecks;
 
     int ret = 0;
 
@@ -346,7 +349,7 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
         ostringstream buf;
 
         ret = DataChecking(block, refBlock, buf, extraDictChecks,
-          extraCifChecks, secKeyChecks);
+          extraCifChecks, secKeyChecks, condMandatoryCatChecks, condMandatoryItemChecks);
 
         string sBuf = buf.str();
 
@@ -371,7 +374,8 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
 
 
 int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
-  const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks)
+  const bool extraDictChecks, const bool extraCifChecks, const bool secKeyChecks,
+  const bool condMandatoryCatChecks, const bool condMandatoryItemChecks)
 {
     /*
     ** Checks data present in a Cif file against a reference dictionary (e.g. sdb file, ddl file)
@@ -382,17 +386,19 @@ int CifFile::DataChecking(Block& block, Block& refBlock, ostringstream& buf,
     _extraDictChecks = extraDictChecks;
     _extraCifChecks = extraCifChecks;
     _secKeyChecks = secKeyChecks;
+    _condMandCatChecks = condMandatoryCatChecks;
+    _condMandItemChecks = condMandatoryItemChecks;
 
     int ret1, ret2;
 
-    ret1 = CheckCategories(block, refBlock, buf);
+    ret1 = CheckCategories(block, refBlock, buf, condMandatoryCatChecks);
     CheckCategoryKey(block, buf);
     if (secKeyChecks)
     {
         CheckCategorySecondaryKey(block, buf);
     }
     CheckItemsTable(block, buf);
-    ret2 = CheckItems(block, refBlock, buf, secKeyChecks);
+    ret2 = CheckItems(block, refBlock, buf, secKeyChecks, condMandatoryItemChecks);
 
     CheckAndRectifyItemTypeCode(block, buf);
 
@@ -1298,7 +1304,7 @@ void CifFile::_PrintHeaderedItems(ostream& cifo,
 }
 
 
-int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
+int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log, const bool condMandatoryCatChecks)
 {
     /*
     ** Determines if conditional categories should be treated as mandatory and checks for the presence of mandatory categories in the block
@@ -1309,7 +1315,10 @@ int CifFile::CheckCategories(Block& block, Block& refBlock, ostringstream& log)
     ISTable* refCatTableP = refBlock.GetTablePtr("category");
     Block* refBlockP = &refBlock; 
     CifConditionalContext* cctx = new CifConditionalContext(block, refBlockP); 
-    CheckConditionalCategories(block, *refCatTableP, *cctx, log); 
+    if (condMandatoryCatChecks)
+    {
+        CheckConditionalCategories(block, *refCatTableP, *cctx, log); 
+    }
 
     vector<string> list;
     list.push_back("mandatory_code");
@@ -1520,7 +1529,7 @@ void CifFile::CheckItemsTable(Block& block, ostringstream& log)
 }
 
 
-int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const bool secKeyChecks)
+int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const bool secKeyChecks, const bool condMandatoryItemChecks)
 {
     /*
     ** Checks if categories and items in the block are defined in the reference file.
@@ -1670,7 +1679,10 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
           keyAttributes, log);
 
         // determine if conditional items are present in the category table, and if so, see if they should be treated as mandatory
-        CheckConditionalItems(block, *catTableP, *itemTableP, *cctx, log);
+        if (condMandatoryItemChecks)
+        {
+            CheckConditionalItems(block, *catTableP, *itemTableP, *cctx, log);
+        }
 
         // if secondary key table exists and secondary key checks are not disabled, get key attributes for secondary key table and check them
         if (secKeyChecks && (catSecKeyTableP != NULL))
@@ -2735,17 +2747,17 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
             string cell = refItemTable(OutList[k], "name");
             string itemName;
             CifString::GetItemFromCifItem(itemName, cell);
-            std::cout << "Conditional item context exists for " << cell << endl; // TEST TEST
+            //std::cout << "Conditional item context exists for " << cell << endl; // TEST TEST
             vector<bool> conditionsMet = (*cctxP).RequireItem(cell);
             for (unsigned int i = 0; i < conditionsMet.size(); ++i)
             {
                 if (conditionsMet[i]) 
                 {
-                    std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
+                    //std::cout << "Instance " << i << " of item " << cell << " is required." << endl; //TEST TEST
                     // Mandatory items must be present in category
                     if(!catTable.IsColumnPresent(itemName)) 
                     {
-                        log << "ERROR - Item \"" << itemName <<
+                        log << "ERROR - Instance " << i << " of item \"" << itemName <<
                         "\" is conditionally mandatory, but is not found in category \"" <<
                         catTable.GetName() << "\"" << endl;
                         break;
@@ -2765,7 +2777,7 @@ void CifFile::CheckConditionalItems(Block& block, ISTable& catTable,
                 { 
                     if(block.IsTablePresent(catTable.GetName()) && catTable.IsColumnPresent(itemName)) // TEST TEST (temp if statement)
                     {
-                        std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
+                        //std::cout << "Instance " << i << " of item " << cell << " is not required." << endl; // TEST TEST
                     }
                     
                 }
@@ -2804,7 +2816,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
         for (unsigned int i = 0; i < OutList.size(); i++)
         {
             const string& catName = (*catTableP)(OutList[i], "id");
-            std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
+            //std::cout << "Conditional category context exists for " << catName << endl; // TEST TEST
             if ((*cctxP).RequireTable(catName))
             {
                 std::cout << "Category " << catName << " is required." << endl; // TEST TEST
@@ -2817,7 +2829,7 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
             }
             else
             {
-                std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
+                //std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
             }
             
         }

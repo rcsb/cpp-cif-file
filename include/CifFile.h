@@ -428,7 +428,8 @@ class CifFile : public TableFile
     */
     int DataChecking(CifFile& dicRef, const std::string& diagFileName,
       const bool extraDictChecks = false, const bool extraCifChecks = false,
-      const std::vector<std::string>& skipBlockNames = std::vector<std::string>(), const bool secKeyChecks = true);
+      const std::vector<std::string>& skipBlockNames = std::vector<std::string>(), const bool secKeyChecks = true,
+      const bool condMandatoryCatChecks = true, const bool condMandatoryItemChecks = true);
 
     /**
     **  Checks a block of CIF file against the specified reference block.
@@ -457,7 +458,8 @@ class CifFile : public TableFile
     **  \exception: None
     */
     int DataChecking(Block& block, Block& refBlock, std::ostringstream& buf,
-      const bool extraDictChecks = false, const bool extraCifChecks = false, const bool secKeyChecks = true);
+      const bool extraDictChecks = false, const bool extraCifChecks = false, const bool secKeyChecks = true,
+      const bool condMandatoryCatChecks = true, const bool condMandatoryItemChecks = true);
 
     /**
     **  Sets enumerations checking option for case-insensitive types.
@@ -670,7 +672,7 @@ class CifFile : public TableFile
      ** \return 0 - if all checks passed;
      ** \return different than 0 - if checks failed
      */
-    int CheckCategories(Block& block, Block& refBlock, std::ostringstream& log);
+    int CheckCategories(Block& block, Block& refBlock, std::ostringstream& log, const bool condMandatoryCatChecks = true);
     /**
      * 
      * 
@@ -709,7 +711,7 @@ class CifFile : public TableFile
      ** \return 0 - if all checks passed;
      ** \return different than 0 - if checks failed 
      */
-    int CheckItems(Block& block, Block& refBlock, std::ostringstream& log, const bool secKeyChecks = true);
+    int CheckItems(Block& block, Block& refBlock, std::ostringstream& log, const bool secKeyChecks = true, const bool condMandatoryItemChecks = true);
     /**
      * Check conditional categories in the given block against the reference category table.
      *
@@ -794,6 +796,8 @@ class CifFile : public TableFile
     bool _extraDictChecks;
     bool _extraCifChecks;
     bool _secKeyChecks;
+    bool _condMandCatChecks;
+    bool _condMandItemChecks;
 
     void Init();
 
