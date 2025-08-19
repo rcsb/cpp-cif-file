@@ -59,6 +59,16 @@ class CifConditionalContext
    */
   std::vector<bool> RequireItem(const std::string& itemName);
 
+  /**
+   ** Determine if an item column in a table should be required/mandatory.
+   **
+   ** \param[out] parentList - list of parent data item names
+   ** \param[in] itemName - the name of the item column.
+   **
+   ** \return true if the item column is required, false otherwise.
+   */
+  bool RequireRelation(std::vector<std::string>& parentList, const std::string& itemName);
+
   // Returns the CifConditionalContextItemAction enum for a particular row
   CifConditionalContextItemAction GetConditionalMandatoryItemContext(const std::string& itemName, unsigned int row);
 
@@ -71,6 +81,7 @@ class CifConditionalContext
   ISTable* pdbxCatConditionalMandatory;
   ISTable* pdbxCatConditionalContext;
   ISTable* pdbxItemConditionalContext;
+  ISTable* pdbxConditionalRelationship;
   ISTable* pdbxConditionalContextList;
   ConditionalDataInfo condDataInfo;
 
@@ -135,6 +146,15 @@ class CifConditionalContext
    */
   unsigned int _getConditionalItemRow(const std::string& itemName); 
   std::vector<unsigned int> _getConditionalItemRows(const std::string& itemName);   
+
+  /**
+   ** Returns the row indices of the specified item in pdbx_item_conditional_context.
+   ** 
+   ** \param[in] itemName - the name of the item.
+   ** 
+   ** \return the row indices of the item as a list of integers.
+   */
+  std::vector<unsigned int> _getConditionalRelationRows(const std::string& itemName);   
 };
 
 #endif

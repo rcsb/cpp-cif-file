@@ -1606,6 +1606,8 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 
     ISTable* itemLinkedTableP = refBlock.GetTablePtr("item_linked");
 
+    ISTable* itemConditionalLinkedTableP = refBlock.GetTablePtr("pdbx_item_conditional_linked");
+
     ISTable* itemTypeListTableP = refBlock.GetTablePtr("item_type_list");
   
     ISTable* itemAliasesTableP = refBlock.GetTablePtr("item_aliases");
@@ -1613,6 +1615,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
     ISTable* itemDefaultTableP = refBlock.GetTablePtr("item_default");
 
     CifParentChild parentChild(refBlock);
+    CifParentChild* parentChildP = &parentChild;
 
     vector<string> catNames;
     block.GetTableNames(catNames);
@@ -1691,9 +1694,10 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 
             CheckSecondaryKeyItems(block.GetName(), *catTableP, secondaryKeyAttributes, *itemTableP, log);
         }
-        if(!secKeyChecks)
+
+        if (itemConditionalLinkedTableP != NULL)
         {
-            //std::cout << "secKeyChecks is disabled, skipping secondary key checks." << std::endl;
+            CheckConditionalRelationships(block, *catTableP, *itemConditionalLinkedTableP, *parentChildP, *cctx, log);
         }
 
 #ifdef JW_DEBUG
@@ -2827,11 +2831,67 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
                     block.GetName() << "\"" << endl;
                 }
             }
-            else
+        }
+    }
+}
+
+void CifFile::CheckConditionalRelationships(Block& block, ISTable& catTable, ISTable& itemConditionalLinkedTable,
+    CifParentChild& cifParentChild, CifConditionalContext& cctx,
+    ostringstream& log)
+{
+    // preliminary version
+    CifConditionalContext* cctxP = &cctx;
+    CifParentChild* cifParentChildP = &cifParentChild;
+    ISTable* catTableP = &catTable;
+    const string& childCatName = catTable.GetName();
+    
+    vector<string> cifItemNames;
+    vector<string> cifItemNamesRef;
+
+    CifString::MakeCifItems(cifItemNames, childCatName, catTable.GetColumnNames());
+    itemConditionalLinkedTable.GetColumn(cifItemNamesRef, "child_name");
+    
+    //std::cout << "Checking conditional relationships for category " << childCatName << endl; // TEST TEST
+    // get items in category, for each item determine if conditional relationship exists
+    for (unsigned int i = 0; i < cifItemNames.size(); i++)
+    {
+        // Check if conditional relationship exists for this item
+        const string& itemName = cifItemNames[i];
+        
+        vector<string> target;
+        //std::cout << "Checking conditional relationships for item " << itemName << endl; // TEST TEST
+        for (unsigned int j = 0; j < cifItemNamesRef.size(); j++)
+        {
+            if(itemName == cifItemNamesRef[j])
             {
-                //std::cout << "Category " << catName << " is not required." << endl; // TEST TEST
+                if ((*cctxP).RequireRelation(target, itemName))
+                {
+                    vector<string> parCifItems;
+                    for (unsigned int j = 0; j < target.size(); j++)
+                    {
+                        // Safety checks
+                        string parentName = target[j];
+                        std::cout << "Relationship for child " << itemName << " and parent " << parentName << " is conditionally required." << endl; // TEST TEST
+                        string parTableName, parColName;
+                        CifString::GetCategoryFromCifItem(parTableName, parentName);
+                        CifString::GetItemFromCifItem(parColName, parentName);
+
+                        // If parent category not in file - cannot require relationship
+                        if (!block.IsTablePresent(parTableName)) 
+                        {
+                            log << "ERROR - category \"" << parTableName <<
+                            "\" is a conditional parent to " << childCatName << ", but is not found in datablock \"" <<
+                            block.GetName() << "\"" << endl;
+                        }
+                        else
+                        {
+                            parCifItems.push_back(parentName);
+                        }
+                    }
+                    // enforce relationships
+                    // look at BuildOldTables -> CreateKeysTableOld -> FillKeysTableOld and how it differs from BuildNewTables - uses item_linked table
+                }
             }
-            
         }
     }
 }

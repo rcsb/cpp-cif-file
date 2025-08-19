@@ -8,6 +8,7 @@
 
 #include "CifString.h"
 #include "CifConditionalContext.h"
+#include "CifParentChild.h"
 #include "ConditionalDataInfo.h"
 
 using std::exception;
@@ -52,8 +53,8 @@ static cmp_code getCmpCode(const string &op) {
 // Constructor
 CifConditionalContext::CifConditionalContext(Block& inBlock, Block *refBlock) :_inBlock(inBlock), condDataInfo(*refBlock)
 {
-  _catConditionalContext = NULL;
-  _itemConditionalContext = NULL;
+  _catConditionalContext = NULL; // no longer used
+  _itemConditionalContext = NULL; // no longer used
   _refBlock = refBlock;
   Block& block = *refBlock;
 
@@ -61,6 +62,7 @@ CifConditionalContext::CifConditionalContext(Block& inBlock, Block *refBlock) :_
   pdbxItemConditionalContext = block.GetTablePtr("pdbx_item_conditional_context");
   pdbxCatConditionalMandatory = block.GetTablePtr("pdbx_category_conditional_mandatory");
   pdbxItemConditionalMandatory = block.GetTablePtr("pdbx_item_conditional_mandatory");
+  pdbxConditionalRelationship = block.GetTablePtr("pdbx_item_conditional_linked");
   pdbxConditionalContextList = block.GetTablePtr("pdbx_conditional_context_list");
 
 }
@@ -74,25 +76,17 @@ CifConditionalContext::~CifConditionalContext()
 // Determine if an entrire category is supposed to be required/made mandatory-- return true if so
 bool CifConditionalContext::RequireTable(const string& tableName) 
 {
-  /*
-  **
-  */
-
-  // Check if both conditional context tables are present
+  // Check if conditional mandatory table is present and tableName is in conditional mandatory table
   // pdbx_category_conditional_mandatory -> table that lists categories that have the potential to be conditionally required (specific to conditional mandatory context)
-  // pdbx_category_conditional_context -> table that lists the conditionals for categories (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
   
-  // if statements will be concatenated in future
-  if (pdbxCatConditionalContext == NULL || pdbxCatConditionalMandatory == NULL) //need both?
+  if (pdbxCatConditionalMandatory == NULL)
   {
-    //std::cout << "CifConditionalContext::RequireTable: No pdbx_category_conditional_context table present for category."<< std::endl; // TEST TEST
     return false;
   }
 
-  //unsigned int queryResult = _getConditionalTableRow(tableName);
   vector<unsigned int> queryResults = _getConditionalTableRows(tableName);
 
-  // If so - test the conditional
+  // If present - test the conditional
   for (unsigned int i = 0; i < queryResults.size(); ++i)
   {
     if (queryResults[i] != pdbxCatConditionalMandatory->GetNumRows()) 
@@ -121,7 +115,6 @@ vector<unsigned int> CifConditionalContext::_getConditionalTableRows(const strin
   vector<string> queryCat;
   queryCat.push_back("category_id");
 
-  //unsigned int queryResult = pdbxCatConditionalContext->FindFirst(queryTarget, queryCat);
   vector<unsigned int> OutList;
 
   pdbxCatConditionalMandatory->Search(OutList, queryTarget, queryCat);
@@ -147,17 +140,11 @@ unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableN
 // Determine if item should be required/made mandatory -- return true if so
 vector<bool> CifConditionalContext::RequireItem(const string& itemName) 
 {
-  /*
-  **
-  */
-
-  // Check if both conditional context tables are present
+  // Check if conditional mandatory table is present
   // pdbx_item_conditional_mandatory -> table that lists items that have the potential to be conditionally required (specific to conditional mandatory context)
-  // pdbx_item_conditional_context -> table that lists the conditionals for items (actions, context ids, etc.) that must be met; are linked to the pdbx_conditional_context_list
   vector<bool> condMandatoryMet;
-  if (pdbxItemConditionalContext == NULL || pdbxItemConditionalMandatory == NULL) //need both?
+  if (pdbxItemConditionalMandatory == NULL)
   {
-    //std::cout << "CifConditionalContext::RequireItem: No pdbx_item_conditional_context table present for item."<< std::endl;
     condMandatoryMet.push_back(false);
     return condMandatoryMet;
   }
@@ -241,55 +228,83 @@ vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string
   return OutList;
 }
 
-// this function is not used -> is it needed? taken from original code
-CifConditionalContextItemAction CifConditionalContext::GetConditionalMandatoryItemContext(const string& itemName, unsigned int row) 
+bool CifConditionalContext::RequireRelation(vector<string>& parents, const string& itemName) 
 {
-  if (pdbxItemConditionalContext == NULL)
-    return eNone;
+  // Check if conditional relationship table is present
+  // pdbx_item_conditional_linked -> table that lists items that have the potential to be conditionally linked as parent/child (specific to conditional mandatory context)
 
-  unsigned int queryResult = _getConditionalItemRow(itemName);
-
-  // If so - test the conditional
-
-  if (queryResult != pdbxItemConditionalContext->GetNumRows()) {
-
-    const string& action = (*pdbxItemConditionalContext)(queryResult, "action");
-    const string& contextId = (*pdbxItemConditionalContext)(queryResult, "context_id");
-
-    CifConditionalContextItemAction eAction = getItemActionEnum(action);
-    if (eAction == eActionUnknown) {
-      throw InvalidOptionsException("CifConditionalContext::GetConditionalMandatoryItemContext unknown action " + action);
-    }
-
+  parents.clear();
+  bool condMandatoryMet;
+  
+  if (pdbxConditionalRelationship == NULL)
+  {
+    condMandatoryMet = false;
+    return condMandatoryMet;
+  }
+  
+  vector<unsigned int> queryResult = _getConditionalRelationRows(itemName);
+  
+  if((queryResult[0] != pdbxConditionalRelationship->GetNumRows()))
+  {
     // Safety checks
-
     string tableName, colName;
     CifString::GetCategoryFromCifItem(tableName, itemName);
     CifString::GetItemFromCifItem(colName, itemName);
-    
-    if (!_inBlock.IsTablePresent(tableName)) {
-      return eNone;
-    }
-
     ISTable* tobj = _inBlock.GetTablePtr(tableName);
-    if (!tobj->IsColumnPresent(colName)) {
-      return eNone;
+
+    // If category not in file - cannot have a relationship
+    if (!_inBlock.IsTablePresent(tableName)) 
+    {
+      condMandatoryMet = false;
+      return condMandatoryMet;
     }
+    
+    for (unsigned int i = 0; i < queryResult.size(); ++i)
+    {
+      // If so - test the conditional
+      if (queryResult[i] != pdbxConditionalRelationship->GetNumRows()) 
+      {
+        const string& contextId = (*pdbxConditionalRelationship)(queryResult[i], "context_id");
+        const string& parentName = (*pdbxConditionalRelationship)(queryResult[i], "parent_name");
+        //std::cout << "CifConditionalContext::RequireRelation: Item " << itemName << "; parent  " << parentName << " based on conditional with context id " << contextId << std::endl; // TEST TEST
 
-    if (row >= tobj->GetNumRows())
-      throw out_of_range("Invalid row CifConditionalContext::GetConditionalMandatoryItemContext");
-
-    bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
-
-    if (!ret)
-      return eNone;
-
-    // Suppress...
-    return eAction;
+        // Iterate rows
+        bool ret = _evalConditionalList(contextId, false, tableName);
+        if (ret)
+	      {
+          parents.push_back(parentName);
+        }
+      }
+    }
   }
 
-  // Else fall through - either no conditional context or is not required
-  return eNone;
+  // Else fall through - no conditional context or no instances of item are required/item not in conditional mandatory table
+  if (parents.empty())
+  {
+    condMandatoryMet = false;
+  }
+  else
+  {
+    // If any parent is required, mark true
+    condMandatoryMet = true;
+  }
+  return condMandatoryMet;
+}
+
+vector<unsigned int> CifConditionalContext::_getConditionalRelationRows(const string& itemName) 
+{
+  // Returns vector of row indices of conditional context if it exists or GetNumRows()
+
+  vector<string> queryTarget;
+  queryTarget.push_back(itemName);
+
+  vector<string> queryCat;
+  queryCat.push_back("child_name");
+
+  vector<unsigned int> OutList;
+  pdbxConditionalRelationship->Search(OutList, queryTarget, queryCat);
+  
+  return OutList;
 }
 
 // Evaluates a conditional context list.

@@ -733,6 +733,18 @@ class CifFile : public TableFile
      */
     void CheckConditionalItems(Block& inBlock, ISTable& refCatTable,
       ISTable& refItemTable, CifConditionalContext& cctx, std::ostringstream& log);
+    /**
+     * Check conditional parent/child relationships between items.
+     * 
+     * \param[in] block - name of the block to which the category belongs
+     * \param[in] catTable - reference to the category table
+     * \param[in] cifParentChild - reference to the parent-child table
+     * \param[in] cctx - reference to the conditional context
+     * \param[out] log - reference to the output stream
+     */
+    void CheckConditionalRelationships(Block& block, ISTable& catTable, ISTable& itemCondLinkedTable,
+      CifParentChild& cifParentChild, CifConditionalContext& cctx, 
+      std::ostringstream& log);
 
 
   protected:
@@ -1010,7 +1022,6 @@ class CifFile : public TableFile
     void CheckMandatoryItems(const std::string& blockName, ISTable& catTable,
       ISTable& refItemTable, const std::vector<std::string>& keyItems,
       std::ostringstream& log);
-
     /**
      * 
      * 
