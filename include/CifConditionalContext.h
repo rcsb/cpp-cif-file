@@ -127,28 +127,25 @@ class CifConditionalContext
 			const std::string &cmp_op, bool catContext, const std::string &catName, const std::string &item, int row=0);
 
   /**
-   ** Returns the row index of the specified category table in pdbx_category_conditional_context.
+   ** Returns the row index of the specified category table in pdbx_category_conditional_mandatory.
    ** 
    ** \param[in] tableName - the name of the category table.
    ** 
-   ** \return the row index of the category table as an integer.
+   ** \return the row indices of the category table as a list of integers.
    */
-  unsigned int _getConditionalTableRow(const std::string& tableName);
-
   std::vector<unsigned int> _getConditionalTableRows(const std::string& tableName);
 
   /**
-   ** Returns the row index of the specified item in pdbx_item_conditional_context.
+   ** Returns the row index of the specified item in pdbx_item_conditional_mandatory.
    ** 
    ** \param[in] itemName - the name of the item.
    ** 
-   ** \return the row index of the item as an integer.
+   ** \return the row indices of the item as a list of integers.
    */
-  unsigned int _getConditionalItemRow(const std::string& itemName); 
   std::vector<unsigned int> _getConditionalItemRows(const std::string& itemName);   
 
   /**
-   ** Returns the row indices of the specified item in pdbx_item_conditional_context.
+   ** Returns the row indices of the specified item in pdbx_item_conditional_linked.
    ** 
    ** \param[in] itemName - the name of the item.
    ** 
