@@ -742,7 +742,7 @@ class CifFile : public TableFile
      * \param[in] cctx - reference to the conditional context
      * \param[out] log - reference to the output stream
      */
-    void CheckConditionalRelationships(Block& block, ISTable& catTable, ISTable& itemCondLinkedTable,
+    void CheckConditionalRelationships(Block& block, Block& refblock, ISTable& catTable, ISTable& itemLinkedTable, ISTable& itemCondLinkedTable,
       CifParentChild& cifParentChild, CifConditionalContext& cctx, 
       std::ostringstream& log);
 

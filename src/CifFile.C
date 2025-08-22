@@ -25,7 +25,6 @@
 #include "regex.h"
 #include "CifParentChild.h"
 #include "CifFile.h"
-#include "CifConditionalContext.h"
 
 
 using std::exception;
@@ -1697,7 +1696,7 @@ int CifFile::CheckItems(Block& block, Block& refBlock, ostringstream& log, const
 
         if (itemConditionalLinkedTableP != NULL)
         {
-            CheckConditionalRelationships(block, *catTableP, *itemConditionalLinkedTableP, *parentChildP, *cctx, log);
+            CheckConditionalRelationships(block, refBlock, *catTableP, *itemLinkedTableP, *itemConditionalLinkedTableP, *parentChildP, *cctx, log);
         }
 
 #ifdef JW_DEBUG
@@ -2835,14 +2834,17 @@ void CifFile::CheckConditionalCategories(Block& block, ISTable& catTable,
     }
 }
 
-void CifFile::CheckConditionalRelationships(Block& block, ISTable& catTable, ISTable& itemConditionalLinkedTable,
+void CifFile::CheckConditionalRelationships(Block& block, Block& refBlock, ISTable& catTable, ISTable& itemLinkedTable, ISTable& itemConditionalLinkedTable,
     CifParentChild& cifParentChild, CifConditionalContext& cctx,
     ostringstream& log)
 {
-    // preliminary version
+     // preliminary version
     CifConditionalContext* cctxP = &cctx;
     CifParentChild* cifParentChildP = &cifParentChild;
     ISTable* catTableP = &catTable;
+    ISTable* itemLinkedTableP = &itemLinkedTable;
+    ISTable* ParChildGroupP = refBlock.GetTablePtr("pdbx_item_linked_group");
+    ISTable* ParChildGroupListP = refBlock.GetTablePtr("pdbx_item_linked_group_list");
     const string& childCatName = catTable.GetName();
     
     vector<string> cifItemNames;
@@ -2872,28 +2874,51 @@ void CifFile::CheckConditionalRelationships(Block& block, ISTable& catTable, IST
                         // Safety checks
                         string parentName = target[j];
                         std::cout << "Relationship for child " << itemName << " and parent " << parentName << " is conditionally required." << endl; // TEST TEST
-                        string parTableName, parColName;
-                        CifString::GetCategoryFromCifItem(parTableName, parentName);
+                        string parCatName, parColName;
+                        CifString::GetCategoryFromCifItem(parCatName, parentName);
                         CifString::GetItemFromCifItem(parColName, parentName);
 
                         // If parent category not in file - cannot require relationship
-                        if (!block.IsTablePresent(parTableName)) 
+                        if (!block.IsTablePresent(parCatName)) 
                         {
-                            log << "ERROR - category \"" << parTableName <<
+                            log << "ERROR - category \"" << parCatName <<
                             "\" is a conditional parent to " << childCatName << ", but is not found in datablock \"" <<
                             block.GetName() << "\"" << endl;
                         }
-                        else
+                        else // think of more exceptions that result in errors
                         {
-                            parCifItems.push_back(parentName);
+                            //this basically does what BuildNewTables does when CifParentChild Init is called
+                            vector<string> linkedRow;
+                            linkedRow.push_back(itemName);
+                            linkedRow.push_back(parentName);
+                            itemLinkedTableP->AddRow(linkedRow);
+
+                            vector<string> newGroupRow;
+                            newGroupRow.push_back(childCatName);
+                            newGroupRow.push_back(String::IntToString(1));
+                            newGroupRow.push_back(childCatName + ":" + parCatName + ":" + String::IntToString(1)); //uses 1 as group number, only works for simple parent-child relationships
+                            newGroupRow.push_back(CifString::InapplicableValue);
+                            newGroupRow.push_back(CifString::InapplicableValue);
+                            ParChildGroupP->AddRow(newGroupRow);
+
+                            vector<string> newGroupListRow;
+                            newGroupListRow.push_back(childCatName);
+                            newGroupListRow.\
+                                push_back(String::IntToString(1)); //uses 1 as group number, only works for simple parent-child relationships
+                            newGroupListRow.push_back\
+                                (itemName);
+                            newGroupListRow.push_back\
+                                (parentName);
+                            newGroupListRow.push_back(parCatName);
+                            ParChildGroupListP->AddRow(newGroupListRow);
                         }
                     }
-                    // enforce relationships
-                    // look at BuildOldTables -> CreateKeysTableOld -> FillKeysTableOld and how it differs from BuildNewTables - uses item_linked table
                 }
             }
         }
     }
+    //find way to create/update relationships, need to update parent-combo keys but functions are protected by ParentChild class (UpdateParComboKeys, UpdateRelations) (both found within CreateAllRelations function)
+    //also look at protected vars _relations and _parComboKeys in ParentChild class specifically
 }
 
 int CifFile::CheckRegExpRangeEnum(Block& block, ISTable& catTable,

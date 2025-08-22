@@ -122,21 +122,6 @@ vector<unsigned int> CifConditionalContext::_getConditionalTableRows(const strin
   return OutList;
 }
 
-unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableName) 
-{
-  // See if table in pdbx_category_conditional_context
-  // Returns count to row in category conditional context with category - or GetNumRows()
-  vector<string> queryTarget;
-  queryTarget.push_back(tableName);
-
-  vector<string> queryCat;
-  queryCat.push_back("category_id");
-
-  unsigned int queryResult = pdbxCatConditionalContext->FindFirst(queryTarget, queryCat);
-
-  return queryResult;
-}
-
 // Determine if item should be required/made mandatory -- return true if so
 vector<bool> CifConditionalContext::RequireItem(const string& itemName) 
 {
@@ -197,20 +182,6 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
     condMandatoryMet.push_back(false);
   }
   return condMandatoryMet;
-}
-
-unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemName) 
-{
-  // Returns row of conditional context if it exists or GetNumRows()
-
-  vector<string> queryTarget;
-  queryTarget.push_back(itemName);
-
-  vector<string> queryCat;
-  queryCat.push_back("item_name");
-
-  unsigned int queryResult = pdbxItemConditionalContext->FindFirst(queryTarget, queryCat);
-  return queryResult;
 }
 
 vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string& itemName) 
