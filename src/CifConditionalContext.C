@@ -129,21 +129,6 @@ vector<unsigned int> CifConditionalContext::_getConditionalTableRows(const strin
   return OutList;
 }
 
-unsigned int CifConditionalContext::_getConditionalTableRow(const string& tableName) 
-{
-  // See if table in pdbx_category_conditional_context
-  // Returns count to row in category conditional context with category - or GetNumRows()
-  vector<string> queryTarget;
-  queryTarget.push_back(tableName);
-
-  vector<string> queryCat;
-  queryCat.push_back("category_id");
-
-  unsigned int queryResult = pdbxCatConditionalContext->FindFirst(queryTarget, queryCat);
-
-  return queryResult;
-}
-
 // Determine if item should be required/made mandatory -- return true if so
 vector<bool> CifConditionalContext::RequireItem(const string& itemName) 
 {
@@ -212,20 +197,6 @@ vector<bool> CifConditionalContext::RequireItem(const string& itemName)
   return condMandatoryMet;
 }
 
-unsigned int CifConditionalContext::_getConditionalItemRow(const string& itemName) 
-{
-  // Returns row of conditional context if it exists or GetNumRows()
-
-  vector<string> queryTarget;
-  queryTarget.push_back(itemName);
-
-  vector<string> queryCat;
-  queryCat.push_back("item_name");
-
-  unsigned int queryResult = pdbxItemConditionalContext->FindFirst(queryTarget, queryCat);
-  return queryResult;
-}
-
 vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string& itemName) 
 {
   // Returns vector of row indices of conditional context if it exists or GetNumRows()
@@ -239,57 +210,6 @@ vector<unsigned int> CifConditionalContext::_getConditionalItemRows(const string
 
   pdbxItemConditionalMandatory->Search(OutList, queryTarget, queryCat);
   return OutList;
-}
-
-// this function is not used -> is it needed? taken from original code
-CifConditionalContextItemAction CifConditionalContext::GetConditionalMandatoryItemContext(const string& itemName, unsigned int row) 
-{
-  if (pdbxItemConditionalContext == NULL)
-    return eNone;
-
-  unsigned int queryResult = _getConditionalItemRow(itemName);
-
-  // If so - test the conditional
-
-  if (queryResult != pdbxItemConditionalContext->GetNumRows()) {
-
-    const string& action = (*pdbxItemConditionalContext)(queryResult, "action");
-    const string& contextId = (*pdbxItemConditionalContext)(queryResult, "context_id");
-
-    CifConditionalContextItemAction eAction = getItemActionEnum(action);
-    if (eAction == eActionUnknown) {
-      throw InvalidOptionsException("CifConditionalContext::GetConditionalMandatoryItemContext unknown action " + action);
-    }
-
-    // Safety checks
-
-    string tableName, colName;
-    CifString::GetCategoryFromCifItem(tableName, itemName);
-    CifString::GetItemFromCifItem(colName, itemName);
-    
-    if (!_inBlock.IsTablePresent(tableName)) {
-      return eNone;
-    }
-
-    ISTable* tobj = _inBlock.GetTablePtr(tableName);
-    if (!tobj->IsColumnPresent(colName)) {
-      return eNone;
-    }
-
-    if (row >= tobj->GetNumRows())
-      throw out_of_range("Invalid row CifConditionalContext::GetConditionalMandatoryItemContext");
-
-    bool ret = _evalConditionalList(contextId, false, tableName, colName, row);
-
-    if (!ret)
-      return eNone;
-
-    // Suppress...
-    return eAction;
-  }
-
-  // Else fall through - either no conditional context or is not required
-  return eNone;
 }
 
 // Evaluates a conditional context list.

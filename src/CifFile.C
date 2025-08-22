@@ -25,7 +25,6 @@
 #include "regex.h"
 #include "CifParentChild.h"
 #include "CifFile.h"
-#include "CifConditionalContext.h"
 
 
 using std::exception;
