@@ -17,8 +17,11 @@
 #include <stdexcept>
 #include <set>
 #include <algorithm>
+#include <cerrno>
+#include <cstring>
 
 #include "GenString.h"
+#include "Exceptions.h"
 #include "RcsbFile.h"
 #include "CifString.h"
 #include "regex.h"
@@ -306,6 +309,14 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
     ofstream log;
     log.open(diagFileName.c_str(), ios::out | ios::app);
 
+    if (!log.is_open() || log.fail())
+    {
+        string msg = "Unable to open diagnostic log file \"" + diagFileName + "\"";
+        if (errno != 0)
+            msg += ": " + string(strerror(errno));
+        throw FileException(msg, "CifFile::DataChecking");
+    }
+
     vector<string> refBlockNames;
     ref.GetBlockNames(refBlockNames);
 
@@ -342,6 +353,14 @@ int CifFile::DataChecking(CifFile& ref, const string& diagFileName,
         {
             log << sBuf << endl;
         }
+    }
+
+    if (log.fail())
+    {
+        string msg = "Unable to write diagnostic log file \"" + diagFileName + "\"";
+        if (errno != 0)
+            msg += ": " + string(strerror(errno));
+        throw FileException(msg, "CifFile::DataChecking");
     }
 
     if (RcsbFile::IsEmpty(log))
